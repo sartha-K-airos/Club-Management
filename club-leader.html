@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Leader Dashboard — MITS StudentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+      * { box-sizing: border-box; }
+      body { background: #f4f2fa; font-family: Inter, sans-serif; color: #1a1a2e; margin: 0; }
+
+      .app-header { background: linear-gradient(135deg, #2d0c5a, #4a1c84); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 30px rgba(74,28,132,0.3); }
+      .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+      .app-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 800; color: #fff; text-decoration: none; }
+      .app-logo span { color: #36c5bc; }
+      .leader-badge { background: #ff8c5f; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; margin-left: 10px; }
+      .header-nav { display: flex; }
+      .nav-tab { padding: 22px 20px; color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; text-decoration: none; display: flex; align-items: center; gap: 6px; letter-spacing: 0.3px; }
+      .nav-tab:hover, .nav-tab.active { color: #fff; border-bottom-color: #ff8c5f; }
+      .header-right { display: flex; align-items: center; gap: 16px; }
+      .user-chip { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 50px; }
+      .user-avatar { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; }
+      .user-name { color: #fff; font-size: 13px; font-weight: 700; }
+      .logout-link { color: rgba(255,255,255,0.5); font-size: 12px; text-decoration: none; font-weight: 600; }
+      .logout-link:hover { color: #fff; }
+
+      .page-body { max-width: 1400px; margin: 0 auto; padding: 32px; }
+
+      /* ─── Club Banner ─── */
+      .club-banner { background: linear-gradient(135deg, #ff8c5f, #ff6348, #e84393); border-radius: 24px; padding: 36px 40px; display: flex; align-items: center; gap: 28px; margin-bottom: 32px; position: relative; overflow: hidden; }
+      .club-banner::after { content:''; position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,0.08);border-radius:50%; }
+      .cb-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); }
+      .cb-info h1 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.8rem; margin: 0 0 6px; }
+      .cb-info p { color: rgba(255,255,255,0.75); margin: 0; font-size: 14px; }
+      .cb-stats { display: flex; gap: 16px; margin-left: auto; z-index: 1; }
+      .cb-stat { text-align: center; background: rgba(255,255,255,0.15); padding: 14px 22px; border-radius: 14px; min-width: 90px; }
+      .cb-stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 800; color: #fff; }
+      .cb-stat-label { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 700; text-transform: uppercase; margin-top: 3px; letter-spacing: 0.8px; }
+
+      /* ─── Layout ─── */
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .full-col { grid-column: 1 / -1; }
+
+      /* ─── Cards ─── */
+      .panel { background: #fff; border-radius: 20px; padding: 28px; border: 1.5px solid #ede8f8; }
+      .panel-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 800; color: #2d0c5a; margin: 0 0 20px; display: flex; align-items: center; gap: 10px; }
+      .panel-title span { font-size: 1.1rem; }
+
+      /* ─── Form styles ─── */
+      .form-group { margin-bottom: 16px; }
+      .form-label { display: block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 7px; letter-spacing: 0.3px; text-transform: uppercase; }
+      .form-input, .form-textarea { width: 100%; padding: 12px 16px; border: 1.5px solid #e8e8e8; border-radius: 12px; font-size: 14px; font-family: Inter, sans-serif; outline: none; transition: border-color 0.2s; background: #fafafa; }
+      .form-input:focus, .form-textarea:focus { border-color: #ff8c5f; background: #fff; }
+      .form-input.error, .form-textarea.error { border-color: #e74c3c; }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .btn-submit { background: linear-gradient(135deg, #ff8c5f, #ff6348); color: #fff; border: none; padding: 13px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.25s; box-shadow: 0 4px 15px rgba(255,140,95,0.35); }
+      .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,140,95,0.45); }
+      .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+      .btn-secondary { background: #f0ecff; color: #4a1c84; border: none; padding: 12px 24px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.2s; }
+      .btn-secondary:hover { background: #e4dcff; }
+
+      /* ─── Requests ─── */
+      .request-card { background: #fafafa; border-radius: 14px; padding: 16px; border: 1.5px solid #f0f0f0; margin-bottom: 12px; transition: border-color 0.2s; }
+      .request-card:hover { border-color: #ff8c5f; }
+      .req-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+      .req-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+      .req-name { font-weight: 700; font-size: 14px; color: #2d0c5a; }
+      .req-date { font-size: 11px; color: #bbb; margin-top: 2px; }
+      .req-msg { font-size: 13px; color: #666; font-style: italic; margin-bottom: 12px; line-height: 1.5; background: #f0ecff; padding: 10px 14px; border-radius: 10px; border-left: 3px solid #4a1c84; }
+      .req-actions { display: flex; gap: 8px; }
+      .btn-approve { flex: 1; background: #d1e7dd; color: #155724; border: 1px solid #28a745; border-radius: 10px; padding: 9px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.2s; }
+      .btn-approve:hover { background: #28a745; color: #fff; }
+      .btn-reject { flex: 1; background: #f8d7da; color: #721c24; border: 1px solid #dc3545; border-radius: 10px; padding: 9px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.2s; }
+      .btn-reject:hover { background: #dc3545; color: #fff; }
+
+      /* ─── Members ─── */
+      .member-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; transition: background 0.2s; }
+      .member-item:hover { background: #f8f6ff; }
+      .member-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+      .member-name { font-weight: 600; font-size: 14px; color: #333; }
+      .member-role { font-size: 11px; color: #aaa; }
+
+      /* ─── Events list ─── */
+      .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+      /* Skeleton */
+      .skeleton-card { background: #fff; border-radius: 16px; overflow: hidden; }
+      .skeleton-img { height: 100px; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+      .skeleton-line { height: 12px; border-radius: 6px; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+      .skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; flex-shrink: 0; }
+      @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+      @media (max-width: 900px) {
+        .two-col { grid-template-columns: 1fr; }
+        .form-row { grid-template-columns: 1fr; }
+        .cb-stats { flex-wrap: wrap; }
+        .header-nav { display: none; }
+        .page-body { padding: 16px; }
+        .club-banner { flex-direction: column; align-items: flex-start; }
+        .cb-stats { margin-left: 0; width: 100%; }
+      }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-inner">
+            <div style="display:flex;align-items:center;">
+                <a href="index.html" class="app-logo">STUDENT<span>HUB</span></a>
+                <span class="leader-badge">LEADER</span>
+            </div>
+            <nav class="header-nav">
+                <a class="nav-tab" href="#" data-tab="manage" onclick="switchTab('manage');return false;">🏛️ Manage Club</a>
+                <a class="nav-tab" href="#" data-tab="events" onclick="switchTab('events');return false;">📅 Events</a>
+                <a class="nav-tab" href="#" data-tab="requests" onclick="switchTab('requests');return false;">📨 Requests <span id="reqBadge" style="background:#e74c3c;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;"></span></a>
+                <a class="nav-tab" href="#" data-tab="members" onclick="switchTab('members');return false;">👥 Members</a>
+            </nav>
+            <div class="header-right">
+                <div class="user-chip">
+                    <img id="userAvatar" src="https://i.pravatar.cc/150" class="user-avatar" alt="Avatar">
+                    <span id="userName" class="user-name">Leader</span>
+                </div>
+                <a href="#" class="logout-link" onclick="Auth.logout();return false;">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-body">
+
+        <!-- Club Banner -->
+        <div class="club-banner" data-aos="fade-down">
+            <img id="clubLogo" src="" alt="Club Logo" class="cb-logo">
+            <div class="cb-info">
+                <h1 id="clubName">My Club</h1>
+                <p id="clubDesc">Loading...</p>
+            </div>
+            <div class="cb-stats">
+                <div class="cb-stat"><div class="cb-stat-num" id="statMembers">0</div><div class="cb-stat-label">Members</div></div>
+                <div class="cb-stat"><div class="cb-stat-num" id="statEvents">0</div><div class="cb-stat-label">Events</div></div>
+                <div class="cb-stat"><div class="cb-stat-num" id="statPending">0</div><div class="cb-stat-label">Pending</div></div>
+            </div>
+        </div>
+
+        <!-- ─── Manage Club Tab ─── -->
+        <div id="tab-manage" class="tab-content">
+            <div class="two-col">
+                <!-- Create Event -->
+                <div class="panel" data-aos="fade-up">
+                    <div class="panel-title"><span>📅</span> Create New Event</div>
+                    <form id="eventForm" novalidate>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Event Title *</label>
+                                <input type="text" id="evTitle" class="form-input" placeholder="e.g. Annual Hackathon" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Date & Time *</label>
+                                <input type="datetime-local" id="evDate" class="form-input" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Image URL</label>
+                            <input type="url" id="evImage" class="form-input" placeholder="https://... (leave blank for default)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description *</label>
+                            <textarea id="evDesc" class="form-textarea" rows="3" placeholder="Describe the event..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit" id="evSubmitBtn">Create Event →</button>
+                    </form>
+                </div>
+
+                <!-- Send Announcement -->
+                <div class="panel" data-aos="fade-up" data-aos-delay="100">
+                    <div class="panel-title"><span>📢</span> Send Announcement</div>
+                    <form id="announcementForm" novalidate>
+                        <div class="form-group">
+                            <label class="form-label">Message to Members *</label>
+                            <textarea id="annMsg" class="form-textarea" rows="4" placeholder="Write your announcement..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit" id="annSubmitBtn" style="background:linear-gradient(135deg,#4a1c84,#7a349c);box-shadow:0 4px 15px rgba(74,28,132,0.3);">Send Announcement →</button>
+                    </form>
+
+                    <!-- Recent Announcements -->
+                    <div style="margin-top:24px;border-top:1px solid #f0f0f0;padding-top:20px;">
+                        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Recent</div>
+                        <div id="recentAnnouncements"></div>
+                    </div>
+                </div>
+
+                <!-- Edit Club Info -->
+                <div class="panel full-col" data-aos="fade-up" data-aos-delay="150">
+                    <div class="panel-title"><span>✏️</span> Update Club Info</div>
+                    <div class="form-group" style="max-width:600px;">
+                        <label class="form-label">Upload Club Thumbnail</label>
+                        <input type="file" id="clubLogoUpload" accept="image/*" class="form-input" style="padding:8px;font-size:13px;">
+                        <input type="hidden" id="clubLogoEdit">
+                    </div>
+                    <div class="form-group" style="max-width:600px;">
+                        <label class="form-label">Club Description</label>
+                        <textarea id="clubDescEdit" class="form-textarea" rows="3"></textarea>
+                    </div>
+                    <button onclick="saveClubInfo()" class="btn-secondary">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Events Tab ─── -->
+        <div id="tab-events" class="tab-content" style="display:none;">
+            <div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Our Events</h2>
+                    <p style="color:#aaa;font-size:13px;margin:0;">Manage events for your club</p>
+                </div>
+            </div>
+            <div class="events-grid" id="eventsContainer"></div>
+        </div>
+
+        <!-- ─── Requests Tab ─── -->
+        <div id="tab-requests" class="tab-content" style="display:none;">
+            <div style="margin-bottom:24px;">
+                <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Join Requests</h2>
+                <p style="color:#aaa;font-size:13px;margin:0;">Review and manage membership applications</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;" id="requestsContainer"></div>
+        </div>
+
+        <!-- ─── Members Tab ─── -->
+        <div id="tab-members" class="tab-content" style="display:none;">
+            <div style="margin-bottom:24px;">
+                <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Member Roster</h2>
+                <p style="color:#aaa;font-size:13px;margin:0;">All approved members of your club</p>
+            </div>
+            <div class="panel" style="max-width:700px;">
+                <div id="membersContainer"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="data/seed-data.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/club-leader.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>AOS.init({ duration: 600, once: true });</script>
+</body>
+</html>

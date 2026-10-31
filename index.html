@@ -191,6 +191,8 @@
         <a href="index.html" class="nav-logo">STUDENT<span>HUB</span></a>
         <div class="nav-links">
             <a href="#explore">Clubs</a>
+            <a href="event-register.html">Event Register</a>
+            <a href="event-feedback.html">Event Feedback</a>
             <a href="#features">Features</a>
             <a href="mailto:admin@mits.edu">Contact</a>
         </div>
@@ -203,6 +205,8 @@
     </nav>
     <div class="mobile-nav" id="mobileNav">
         <a href="#explore">Clubs</a>
+        <a href="event-register.html">Event Register</a>
+        <a href="event-feedback.html">Event Feedback</a>
         <a href="#features">Features</a>
         <a href="mailto:admin@mits.edu">Contact</a>
         <button class="nav-login-btn" onclick="document.getElementById('loginModal').classList.add('open')">Login →</button>
@@ -238,9 +242,9 @@
         <div class="decor-circle c4"></div>
         <div style="max-width:1200px;margin:0 auto;position:relative;z-index:10;">
             <div data-aos="fade-up">
-                <h2 class="section-title">Today's Trend</h2>
+                <h2 class="section-title">Explore Campus Clubs</h2>
                 <div class="section-divider"></div>
-                <h3 style="text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:1.8rem;margin-bottom:32px;">Season Collection</h3>
+                <h3 style="text-align:center;font-family:'Inter',sans-serif;font-weight:700;font-size:1.3rem;color:#005cff;margin-bottom:32px;">Discover your community across 60+ technical and cultural student chapters</h3>
                 <input type="text" id="landingSearch" class="clubs-search" placeholder="Search clubs...">
             </div>
             <div class="filter-chips" id="filterChips">
@@ -421,24 +425,7 @@
         </div>
     </div>
 
-    <!-- ─── Club Details Modal (Image 3 Style) ─── -->
-    <div class="club-details-overlay" id="clubDetailsModal">
-        <div class="club-details-container">
-            <button class="club-details-close" onclick="document.getElementById('clubDetailsModal').classList.remove('open')">✕</button>
-            <div class="club-details-left" id="cdLeftBg"></div>
-            <div class="club-details-right">
-                <div class="club-details-bg-text" id="cdBgText">SALES</div>
-                <div class="club-details-circle"></div>
-                <div class="club-details-circle-bottom"></div>
-                <h3 style="font-family:'Inter',sans-serif;font-weight:800;font-size:1.8rem;margin-bottom:24px;">Season Collection</h3>
-                <h2 class="club-details-name" id="cdName">Club Name</h2>
-                <p class="club-details-desc" id="cdDesc">Club description goes here...</p>
-                <div>
-                    <button class="btn-hero-primary" style="background:#111;color:#fff;padding:12px 32px;" onclick="document.getElementById('clubDetailsModal').classList.remove('open'); document.getElementById('loginModal').classList.add('open');">Join Club →</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Scripts -->
     <script src="data/seed-data.js"></script>
@@ -515,14 +502,7 @@
         }, 250));
       }
 
-      window.openClubDetails = function(club) {
-        document.getElementById('cdName').textContent = club.name;
-        document.getElementById('cdDesc').textContent = club.description;
-        document.getElementById('cdBgText').textContent = club.category.toUpperCase();
-        // Give a default image if no proper logo
-        document.getElementById('cdLeftBg').style.backgroundImage = `url(${club.logo || 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=800&q=80'})`;
-        document.getElementById('clubDetailsModal').classList.add('open');
-      };
+
 
       // ─── Login Modal ──────────────────────────────────────────────────────
       document.getElementById('openLoginBtn').onclick = () => document.getElementById('loginModal').classList.add('open');

@@ -11,95 +11,163 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
       * { box-sizing: border-box; }
-      body { background: #f4f2fa; font-family: Inter, sans-serif; color: #1a1a2e; margin: 0; }
+      body { background: #f4f2fa; font-family: 'Inter', sans-serif; color: #1a1a2e; margin: 0; }
 
       .app-header { background: linear-gradient(135deg, #2d0c5a, #4a1c84); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 30px rgba(74,28,132,0.3); }
-      .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+      .header-inner { max-width: 1480px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 68px; }
       .app-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 800; color: #fff; text-decoration: none; }
       .app-logo span { color: #36c5bc; }
       .leader-badge { background: #ff8c5f; color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px; margin-left: 10px; }
-      .header-nav { display: flex; }
-      .nav-tab { padding: 22px 20px; color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; text-decoration: none; display: flex; align-items: center; gap: 6px; letter-spacing: 0.3px; }
+      .header-nav { display: flex; overflow-x: auto; max-width: 900px; scrollbar-width: none; }
+      .header-nav::-webkit-scrollbar { display: none; }
+      .nav-tab { padding: 22px 14px; color: rgba(255,255,255,0.7); font-size: 12.5px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; text-decoration: none; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
       .nav-tab:hover, .nav-tab.active { color: #fff; border-bottom-color: #ff8c5f; }
-      .header-right { display: flex; align-items: center; gap: 16px; }
+      .header-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
       .user-chip { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 50px; }
       .user-avatar { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; }
       .user-name { color: #fff; font-size: 13px; font-weight: 700; }
-      .logout-link { color: rgba(255,255,255,0.5); font-size: 12px; text-decoration: none; font-weight: 600; }
+      .logout-link { color: rgba(255,255,255,0.6); font-size: 12px; text-decoration: none; font-weight: 600; }
       .logout-link:hover { color: #fff; }
 
-      .page-body { max-width: 1400px; margin: 0 auto; padding: 32px; }
+      .page-body { max-width: 1480px; margin: 0 auto; padding: 28px 24px; }
 
-      /* ─── Club Banner ─── */
-      .club-banner { background: linear-gradient(135deg, #ff8c5f, #ff6348, #e84393); border-radius: 24px; padding: 36px 40px; display: flex; align-items: center; gap: 28px; margin-bottom: 32px; position: relative; overflow: hidden; }
+      /* Club Banner */
+      .club-banner { background: linear-gradient(135deg, #ff8c5f, #ff6348, #e84393); border-radius: 24px; padding: 32px 36px; display: flex; align-items: center; gap: 24px; margin-bottom: 28px; position: relative; overflow: hidden; }
       .club-banner::after { content:''; position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,0.08);border-radius:50%; }
-      .cb-logo { width: 80px; height: 80px; border-radius: 18px; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); }
+      .cb-logo { width: 75px; height: 75px; border-radius: 18px; object-fit: cover; border: 3px solid rgba(255,255,255,0.4); background:#fff; }
       .cb-info h1 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.8rem; margin: 0 0 6px; }
-      .cb-info p { color: rgba(255,255,255,0.75); margin: 0; font-size: 14px; }
-      .cb-stats { display: flex; gap: 16px; margin-left: auto; z-index: 1; }
-      .cb-stat { text-align: center; background: rgba(255,255,255,0.15); padding: 14px 22px; border-radius: 14px; min-width: 90px; }
-      .cb-stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 800; color: #fff; }
-      .cb-stat-label { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 700; text-transform: uppercase; margin-top: 3px; letter-spacing: 0.8px; }
+      .cb-info p { color: rgba(255,255,255,0.85); margin: 0; font-size: 13.5px; }
+      .cb-stats { display: flex; gap: 14px; margin-left: auto; z-index: 1; flex-shrink: 0; }
+      .cb-stat { text-align: center; background: rgba(255,255,255,0.18); padding: 12px 18px; border-radius: 14px; min-width: 85px; backdrop-filter: blur(4px); }
+      .cb-stat-num { font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 800; color: #fff; }
+      .cb-stat-label { font-size: 10.5px; color: rgba(255,255,255,0.8); font-weight: 700; text-transform: uppercase; margin-top: 2px; letter-spacing: 0.6px; }
 
-      /* ─── Layout ─── */
+      /* Layout */
       .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
       .full-col { grid-column: 1 / -1; }
 
-      /* ─── Cards ─── */
-      .panel { background: #fff; border-radius: 20px; padding: 28px; border: 1.5px solid #ede8f8; }
-      .panel-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 800; color: #2d0c5a; margin: 0 0 20px; display: flex; align-items: center; gap: 10px; }
-      .panel-title span { font-size: 1.1rem; }
+      /* Cards & Panels */
+      .panel { background: #fff; border-radius: 20px; padding: 28px; border: 1.5px solid #ede8f8; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+      .panel-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 800; color: #2d0c5a; margin: 0 0 18px; display: flex; align-items: center; justify-content: space-between; }
 
-      /* ─── Form styles ─── */
+      /* Form elements */
       .form-group { margin-bottom: 16px; }
-      .form-label { display: block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 7px; letter-spacing: 0.3px; text-transform: uppercase; }
-      .form-input, .form-textarea { width: 100%; padding: 12px 16px; border: 1.5px solid #e8e8e8; border-radius: 12px; font-size: 14px; font-family: Inter, sans-serif; outline: none; transition: border-color 0.2s; background: #fafafa; }
-      .form-input:focus, .form-textarea:focus { border-color: #ff8c5f; background: #fff; }
-      .form-input.error, .form-textarea.error { border-color: #e74c3c; }
+      .form-label { display: block; font-size: 12px; font-weight: 700; color: #555; margin-bottom: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
+      .form-input, .form-textarea, .form-select { width: 100%; padding: 11px 15px; border: 1.5px solid #e2e2ec; border-radius: 12px; font-size: 13.5px; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; background: #fafafa; }
+      .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: #ff8c5f; background: #fff; }
       .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-      .btn-submit { background: linear-gradient(135deg, #ff8c5f, #ff6348); color: #fff; border: none; padding: 13px 28px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.25s; box-shadow: 0 4px 15px rgba(255,140,95,0.35); }
+      .btn-submit { background: linear-gradient(135deg, #ff8c5f, #ff6348); color: #fff; border: none; padding: 12px 24px; border-radius: 12px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.25s; box-shadow: 0 4px 15px rgba(255,140,95,0.35); }
       .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,140,95,0.45); }
-      .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-      .btn-secondary { background: #f0ecff; color: #4a1c84; border: none; padding: 12px 24px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.2s; }
-      .btn-secondary:hover { background: #e4dcff; }
+      .btn-secondary { background: #f0ecff; color: #4a1c84; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-      /* ─── Requests ─── */
-      .request-card { background: #fafafa; border-radius: 14px; padding: 16px; border: 1.5px solid #f0f0f0; margin-bottom: 12px; transition: border-color 0.2s; }
-      .request-card:hover { border-color: #ff8c5f; }
-      .req-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-      .req-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-      .req-name { font-weight: 700; font-size: 14px; color: #2d0c5a; }
-      .req-date { font-size: 11px; color: #bbb; margin-top: 2px; }
-      .req-msg { font-size: 13px; color: #666; font-style: italic; margin-bottom: 12px; line-height: 1.5; background: #f0ecff; padding: 10px 14px; border-radius: 10px; border-left: 3px solid #4a1c84; }
-      .req-actions { display: flex; gap: 8px; }
-      .btn-approve { flex: 1; background: #d1e7dd; color: #155724; border: 1px solid #28a745; border-radius: 10px; padding: 9px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.2s; }
-      .btn-approve:hover { background: #28a745; color: #fff; }
-      .btn-reject { flex: 1; background: #f8d7da; color: #721c24; border: 1px solid #dc3545; border-radius: 10px; padding: 9px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: Inter, sans-serif; transition: all 0.2s; }
-      .btn-reject:hover { background: #dc3545; color: #fff; }
+      /* Tables */
+      .styled-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      .styled-table th { background: #f8f6fc; color: #4a1c84; font-weight: 700; text-align: left; padding: 12px 14px; border-bottom: 2px solid #ede8f8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.6px; }
+      .styled-table td { padding: 12px 14px; border-bottom: 1px solid #f0f0f5; vertical-align: middle; }
+      .styled-table tr:hover { background: #faf8ff; }
 
-      /* ─── Members ─── */
-      .member-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; transition: background 0.2s; }
-      .member-item:hover { background: #f8f6ff; }
-      .member-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-      .member-name { font-weight: 600; font-size: 14px; color: #333; }
-      .member-role { font-size: 11px; color: #aaa; }
+      /* Sub Tabs */
+      .sub-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+      .sub-tab-btn { padding: 8px 18px; border-radius: 8px; border: none; background: #f0ecff; color: #4a1c84; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+      .sub-tab-btn.active { background: #4a1c84; color: #fff; }
 
-      /* ─── Events list ─── */
-      .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+      /* Event Card Sub Tabs & Panels */
+      .ev-card-tab-btn { padding: 8px 16px; border-radius: 20px; border: 1.5px solid #e0d8f0; background: #faf9fd; color: #4a1c84; font-size: 12.5px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+      .ev-card-tab-btn:hover { background: #efeafb; border-color: #4a1c84; }
+      .ev-card-tab-btn.active { background: #4a1c84; color: #fff; border-color: #4a1c84; box-shadow: 0 2px 8px rgba(74,28,132,0.25); }
+      .ev-inline-box { background: #faf9fd; border-radius: 16px; padding: 20px; border: 1.5px solid #ede8f8; }
 
-      /* Skeleton */
-      .skeleton-card { background: #fff; border-radius: 16px; overflow: hidden; }
-      .skeleton-img { height: 100px; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-      .skeleton-line { height: 12px; border-radius: 6px; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-      .skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; flex-shrink: 0; }
-      @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+      /* Simple Event Cards Grid */
+      .event-simple-card {
+        background: #fff;
+        border-radius: 20px;
+        border: 1.5px solid #ede8f8;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(74,28,132,0.04);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        position: relative;
+      }
+      .event-simple-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(74,28,132,0.12);
+        border-color: #d1c4ea;
+      }
+      .event-simple-img-wrap {
+        position: relative;
+        height: 170px;
+        width: 100%;
+        overflow: hidden;
+        background: #f0ecfa;
+      }
+      .event-simple-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.35s ease;
+      }
+      .event-simple-card:hover .event-simple-img {
+        transform: scale(1.05);
+      }
+      .event-simple-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 50px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      }
+      .event-simple-body {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .event-simple-title {
+        margin: 0 0 10px;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #2d0c5a;
+        line-height: 1.3;
+      }
+      .event-simple-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 12.5px;
+        color: #666;
+        margin-bottom: 14px;
+      }
+      .event-chips-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: auto;
+        padding-top: 14px;
+        border-top: 1px solid #f2eff8;
+      }
+      .event-chip-item {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 6px;
+        background: #f4f0fa;
+        color: #4a1c84;
+      }
+
+      @keyframes slideUp {
+        from { transform: translateY(24px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
 
       @media (max-width: 900px) {
         .two-col { grid-template-columns: 1fr; }
         .form-row { grid-template-columns: 1fr; }
-        .cb-stats { flex-wrap: wrap; }
-        .header-nav { display: none; }
-        .page-body { padding: 16px; }
         .club-banner { flex-direction: column; align-items: flex-start; }
         .cb-stats { margin-left: 0; width: 100%; }
       }
@@ -110,19 +178,21 @@
     <header class="app-header">
         <div class="header-inner">
             <div style="display:flex;align-items:center;">
-                <a href="index.html" class="app-logo">STUDENT<span>HUB</span></a>
-                <span class="leader-badge">LEADER</span>
+                <a href="index.html" class="app-logo">MITS STUDENT<span>HUB</span></a>
+                <span class="leader-badge">CLUB LEADER</span>
             </div>
             <nav class="header-nav">
-                <a class="nav-tab" href="#" data-tab="manage" onclick="switchTab('manage');return false;">🏛️ Manage Club</a>
+                <a class="nav-tab active" href="#" data-tab="manage" onclick="switchTab('manage');return false;">🏛️ Manage</a>
                 <a class="nav-tab" href="#" data-tab="events" onclick="switchTab('events');return false;">📅 Events</a>
-                <a class="nav-tab" href="#" data-tab="requests" onclick="switchTab('requests');return false;">📨 Requests <span id="reqBadge" style="background:#e74c3c;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;"></span></a>
+                <a class="nav-tab" href="#" data-tab="reports" onclick="switchTab('reports');return false;">📊 Reports to Admin</a>
+                <a class="nav-tab" href="#" data-tab="team" onclick="switchTab('team');return false;">👑 Hierarchy</a>
+                <a class="nav-tab" href="#" data-tab="requests" onclick="switchTab('requests');return false;">📨 Requests <span id="reqBadge" style="background:#e74c3c;color:#fff;border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;font-size:10px;font-weight:800;"></span></a>
                 <a class="nav-tab" href="#" data-tab="members" onclick="switchTab('members');return false;">👥 Members</a>
             </nav>
             <div class="header-right">
                 <div class="user-chip">
-                    <img id="userAvatar" src="https://i.pravatar.cc/150" class="user-avatar" alt="Avatar">
-                    <span id="userName" class="user-name">Leader</span>
+                    <img id="userAvatar" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150" class="user-avatar" alt="Avatar">
+                    <span id="userName" class="user-name">Arjun Mehta</span>
                 </div>
                 <a href="#" class="logout-link" onclick="Auth.logout();return false;">Logout</a>
             </div>
@@ -135,113 +205,333 @@
         <div class="club-banner" data-aos="fade-down">
             <img id="clubLogo" src="" alt="Club Logo" class="cb-logo">
             <div class="cb-info">
-                <h1 id="clubName">My Club</h1>
-                <p id="clubDesc">Loading...</p>
+                <h1 id="clubName">The AI Club</h1>
+                <p id="clubDesc">Technology · Loading...</p>
             </div>
             <div class="cb-stats">
                 <div class="cb-stat"><div class="cb-stat-num" id="statMembers">0</div><div class="cb-stat-label">Members</div></div>
                 <div class="cb-stat"><div class="cb-stat-num" id="statEvents">0</div><div class="cb-stat-label">Events</div></div>
-                <div class="cb-stat"><div class="cb-stat-num" id="statPending">0</div><div class="cb-stat-label">Pending</div></div>
+                <div class="cb-stat"><div class="cb-stat-num" id="statPending">0</div><div class="cb-stat-label">Pending Req</div></div>
             </div>
         </div>
 
-        <!-- ─── Manage Club Tab ─── -->
+        <!-- ─── 1. Manage Club Tab ─── -->
         <div id="tab-manage" class="tab-content">
             <div class="two-col">
                 <!-- Create Event -->
                 <div class="panel" data-aos="fade-up">
-                    <div class="panel-title"><span>📅</span> Create New Event</div>
+                    <div class="panel-title"><span>📅 Schedule New Event</span></div>
                     <form id="eventForm" novalidate>
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Event Title *</label>
-                                <input type="text" id="evTitle" class="form-input" placeholder="e.g. Annual Hackathon" required>
+                                <input type="text" id="evTitle" class="form-input" placeholder="e.g. Generative AI Hands-on Workshop" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Date & Time *</label>
                                 <input type="datetime-local" id="evDate" class="form-input" required>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Image URL</label>
-                            <input type="url" id="evImage" class="form-input" placeholder="https://... (leave blank for default)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Venue Location *</label>
+                                <input type="text" id="evVenue" class="form-input" placeholder="e.g. Seminar Hall 2, Dept of CSE" value="Seminar Hall 2" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Seat Capacity *</label>
+                                <input type="number" id="evCapacity" class="form-input" placeholder="e.g. 100" value="80" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Event Pricing / Access Type *</label>
+                                <select id="evIsPaid" class="form-select" onchange="toggleEventPriceInput()">
+                                    <option value="false" selected>✨ Free Entry (₹0 — Open to all students)</option>
+                                    <option value="true">💰 Paid Registration (Requires Student Fee)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="evPriceGroup" style="display:none;">
+                                <label class="form-label">Registration Fee Amount (₹) *</label>
+                                <input type="number" id="evPrice" class="form-input" placeholder="e.g. 150" min="1" value="150">
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Description *</label>
-                            <textarea id="evDesc" class="form-textarea" rows="3" placeholder="Describe the event..." required></textarea>
+                            <label class="form-label">Banner Image URL</label>
+                            <input type="url" id="evImage" class="form-input" placeholder="https://images.unsplash.com/... (optional)">
                         </div>
-                        <button type="submit" class="btn-submit" id="evSubmitBtn">Create Event →</button>
+                        <div class="form-group">
+                            <label class="form-label">Description & Objectives *</label>
+                            <textarea id="evDesc" class="form-textarea" rows="3" placeholder="Outline topics covered, target audience, prerequisites, and learning outcomes..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit" id="evSubmitBtn">Publish Event to Portal →</button>
                     </form>
                 </div>
 
                 <!-- Send Announcement -->
                 <div class="panel" data-aos="fade-up" data-aos-delay="100">
-                    <div class="panel-title"><span>📢</span> Send Announcement</div>
+                    <div class="panel-title"><span>📢 Broadcast Announcement</span></div>
                     <form id="announcementForm" novalidate>
                         <div class="form-group">
-                            <label class="form-label">Message to Members *</label>
-                            <textarea id="annMsg" class="form-textarea" rows="4" placeholder="Write your announcement..." required></textarea>
+                            <label class="form-label">Message to Club Members *</label>
+                            <textarea id="annMsg" class="form-textarea" rows="4" placeholder="Important announcement, venue changes, meeting links, or prep instructions..." required></textarea>
                         </div>
-                        <button type="submit" class="btn-submit" id="annSubmitBtn" style="background:linear-gradient(135deg,#4a1c84,#7a349c);box-shadow:0 4px 15px rgba(74,28,132,0.3);">Send Announcement →</button>
+                        <button type="submit" class="btn-submit" id="annSubmitBtn" style="background:linear-gradient(135deg,#4a1c84,#7a349c);">Broadcast Announcement →</button>
                     </form>
 
-                    <!-- Recent Announcements -->
-                    <div style="margin-top:24px;border-top:1px solid #f0f0f0;padding-top:20px;">
-                        <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Recent</div>
+                    <div style="margin-top:20px;border-top:1px solid #f0f0f0;padding-top:16px;">
+                        <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Recent Announcements</div>
                         <div id="recentAnnouncements"></div>
                     </div>
                 </div>
 
-                <!-- Edit Club Info -->
-                <div class="panel full-col" data-aos="fade-up" data-aos-delay="150">
-                    <div class="panel-title"><span>✏️</span> Update Club Info</div>
-                    <div class="form-group" style="max-width:600px;">
-                        <label class="form-label">Upload Club Thumbnail</label>
-                        <input type="file" id="clubLogoUpload" accept="image/*" class="form-input" style="padding:8px;font-size:13px;">
-                        <input type="hidden" id="clubLogoEdit">
+                <!-- Update Club Info -->
+                <div class="panel full-col">
+                    <div class="panel-title"><span>✏️ Club Profile & Bio</span></div>
+                    <div class="form-group">
+                        <label class="form-label">Club Description / Mission</label>
+                        <textarea id="clubDescEdit" class="form-textarea" rows="2"></textarea>
                     </div>
-                    <div class="form-group" style="max-width:600px;">
-                        <label class="form-label">Club Description</label>
-                        <textarea id="clubDescEdit" class="form-textarea" rows="3"></textarea>
-                    </div>
-                    <button onclick="saveClubInfo()" class="btn-secondary">Save Changes</button>
+                    <button onclick="saveClubInfo()" class="btn-secondary">Save Updates</button>
                 </div>
             </div>
         </div>
 
-        <!-- ─── Events Tab ─── -->
+        <!-- ─── 2. Events Tab (Clean Card Grid; Click to Open Full Event Management) ─── -->
         <div id="tab-events" class="tab-content" style="display:none;">
-            <div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
                 <div>
-                    <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Our Events</h2>
-                    <p style="color:#aaa;font-size:13px;margin:0;">Manage events for your club</p>
+                    <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;font-size:1.8rem;">Club Events Hub</h2>
+                    <p style="color:#777;font-size:13.5px;margin:0;">Select any event below to open its dedicated control panel for <b>Live Attendance</b>, <b>Student Registration Pass</b>, <b>Invited Experts</b>, <b>Photo Glimpses</b>, and <b>Student Feedback</b>.</p>
+                </div>
+                <button onclick="switchTab('manage')" class="btn-submit" style="padding:10px 22px;font-size:13px;">+ Schedule New Event</button>
+            </div>
+
+            <!-- Events Grid (Clean, Simple Interface) -->
+            <div id="eventsContainer" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));gap:24px;"></div>
+        </div>
+
+        <!-- ─── 3. Reports Tab (Requirements 1 & 9) ─── -->
+        <div id="tab-reports" class="tab-content" style="display:none;">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" id="btnSubTabEventReport" onclick="switchReportSubTab('eventReport')">📄 Post-Event Reports (Submitted to SuperAdmin)</button>
+                <button class="sub-tab-btn" id="btnSubTabQuarterlyReport" onclick="switchReportSubTab('quarterlyReport')">📅 3-Month (Quarterly) Performance Report</button>
+            </div>
+
+            <!-- SubTab A: Post-Event Reports to SuperAdmin (Requirement 1) -->
+            <div id="subTabContentEventReport">
+                <div class="two-col">
+                    <!-- Submit New Event Report -->
+                    <div class="panel">
+                        <div class="panel-title"><span>📝 Submit Event Completion Report</span></div>
+                        <p style="color:#777;font-size:12.5px;margin:-10px 0 16px;">This official report is sent directly to the SuperAdmin / Dean Student Welfare for accreditation and audit.</p>
+
+                        <form id="eventReportForm">
+                            <div class="form-group">
+                                <label class="form-label">Conducted Event *</label>
+                                <select id="repEventSelect" class="form-select" required></select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Actual Attendance Count *</label>
+                                    <input type="number" id="repAttendance" class="form-input" placeholder="e.g. 74" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Total Budget Spent (₹) *</label>
+                                    <input type="number" id="repBudget" class="form-input" placeholder="e.g. 5200" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Invited Experts / Guest Speakers</label>
+                                <input type="text" id="repExperts" class="form-input" placeholder="e.g. Dr. Aris Thorne (Google DeepMind)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Event Executive Summary *</label>
+                                <textarea id="repSummary" class="form-textarea" rows="3" placeholder="Brief 3-4 sentence overview of the event..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Objectives Achieved & Key Outcomes *</label>
+                                <textarea id="repOutcomes" class="form-textarea" rows="2" placeholder="List tangible student achievements, projects built, or awards..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn-submit" id="btnSubmitRep">Submit Report to SuperAdmin →</button>
+                        </form>
+                    </div>
+
+                    <!-- Submitted Reports List -->
+                    <div class="panel">
+                        <div class="panel-title"><span>📋 Submitted Event Reports</span></div>
+                        <div id="submittedReportsList" style="display:flex;flex-direction:column;gap:12px;"></div>
+                    </div>
                 </div>
             </div>
-            <div class="events-grid" id="eventsContainer"></div>
+
+            <!-- SubTab B: 3-Month Quarterly Report (Requirement 9) -->
+            <div id="subTabContentQuarterlyReport" style="display:none;">
+                <div class="two-col">
+                    <!-- Generator Form -->
+                    <div class="panel">
+                        <div class="panel-title"><span>📅 Compile 3-Month Club Activity Report</span></div>
+                        <p style="color:#777;font-size:12.5px;margin:-10px 0 16px;">Consolidated quarterly assessment for the Academic Cell & Administration.</p>
+
+                        <form id="quarterlyForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Select Quarter *</label>
+                                    <select id="qRepQuarter" class="form-select" required>
+                                        <option value="Q1 (July - September 2026)">Q1 (July - September 2026)</option>
+                                        <option value="Q2 (October - December 2026)" selected>Q2 (October - December 2026)</option>
+                                        <option value="Q3 (January - March 2027)">Q3 (January - March 2027)</option>
+                                        <option value="Q4 (April - June 2027)">Q4 (April - June 2027)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Academic Session *</label>
+                                    <input type="text" id="qRepSession" class="form-input" value="2026-2027" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Events Held in 3 Months *</label>
+                                    <input type="number" id="qRepEvents" class="form-input" value="4" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Total Student Footfall *</label>
+                                    <input type="number" id="qRepFootfall" class="form-input" value="290" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">New Members Inducted *</label>
+                                    <input type="number" id="qRepMembers" class="form-input" value="38" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Budget Utilized (₹) *</label>
+                                    <input type="number" id="qRepBudget" class="form-input" value="28400" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Quarterly Executive Summary *</label>
+                                <textarea id="qRepSummary" class="form-textarea" rows="2" placeholder="Summary of major activities and initiatives conducted over the last 3 months..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Key Achievements *</label>
+                                <textarea id="qRepAchievements" class="form-textarea" rows="2" placeholder="Milestones, contest wins, external partnerships, or projects shipped..." required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Roadmap for Next Quarter</label>
+                                <textarea id="qRepRoadmap" class="form-textarea" rows="2" placeholder="Planned flagship events, workshop topics, and recruitment drive..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-submit" id="btnSubmitQuarterly">Submit 3-Month Report to SuperAdmin →</button>
+                        </form>
+                    </div>
+
+                    <!-- Submitted Quarterly Reports -->
+                    <div class="panel">
+                        <div class="panel-title"><span>📑 Quarterly Review Archive</span></div>
+                        <div id="quarterlyReportsArchive" style="display:flex;flex-direction:column;gap:14px;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- ─── Requests Tab ─── -->
+        <!-- ─── 5. Leadership Hierarchy Management (Requirement 6) ─── -->
+        <div id="tab-team" class="tab-content" style="display:none;">
+            <div class="two-col">
+                <!-- Add Leadership Post -->
+                <div class="panel">
+                    <div class="panel-title"><span>👑 Appoint / Add Student Position</span></div>
+                    <p style="color:#777;font-size:12.5px;margin:-10px 0 16px;">Define the student leadership hierarchy (President, Vice President, Secretary, etc.) visible on the public club page.</p>
+
+                    <form id="teamPostForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Position / Designation *</label>
+                                <select id="postTitle" class="form-select" required>
+                                    <option value="President" data-order="1">President (Order 1)</option>
+                                    <option value="Vice President" data-order="2">Vice President (Order 2)</option>
+                                    <option value="Secretary" data-order="3">Secretary (Order 3)</option>
+                                    <option value="Joint Secretary" data-order="4">Joint Secretary (Order 4)</option>
+                                    <option value="Treasurer" data-order="5">Treasurer (Order 5)</option>
+                                    <option value="Technical Head" data-order="6">Technical Head (Order 6)</option>
+                                    <option value="Design Head" data-order="7">Design Head (Order 7)</option>
+                                    <option value="PR & Outreach Head" data-order="8">PR & Outreach Head (Order 8)</option>
+                                    <option value="Executive Member" data-order="9">Executive Member (Order 9)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Student Full Name *</label>
+                                <input type="text" id="postName" class="form-input" placeholder="e.g. Arjun Mehta" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Department / Branch *</label>
+                                <input type="text" id="postDept" class="form-input" placeholder="e.g. Computer Science" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Academic Year *</label>
+                                <select id="postYear" class="form-select" required>
+                                    <option value="4th Year">4th Year</option>
+                                    <option value="3rd Year" selected>3rd Year</option>
+                                    <option value="2nd Year">2nd Year</option>
+                                    <option value="1st Year">1st Year</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Photo URL</label>
+                            <input type="url" id="postAvatar" class="form-input" placeholder="https://... (leave blank for avatar)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Short Bio / Leadership Responsibilities</label>
+                            <textarea id="postBio" class="form-textarea" rows="2" placeholder="Area of focus, research, and contribution to club members..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">LinkedIn Profile Link</label>
+                            <input type="url" id="postLinkedin" class="form-input" placeholder="https://linkedin.com/in/...">
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnSubmitPost">Save Leadership Appointment →</button>
+                    </form>
+                </div>
+
+                <!-- Active Hierarchy List -->
+                <div class="panel">
+                    <div class="panel-title"><span>🏛️ Current Club Executive Board</span></div>
+                    <div id="clubHierarchyList" style="display:flex;flex-direction:column;gap:12px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── 6. Join Requests Tab (Requirement 7) ─── -->
         <div id="tab-requests" class="tab-content" style="display:none;">
-            <div style="margin-bottom:24px;">
-                <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Join Requests</h2>
-                <p style="color:#aaa;font-size:13px;margin:0;">Review and manage membership applications</p>
+            <div style="margin-bottom:20px;">
+                <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Membership Applications</h2>
+                <p style="color:#777;font-size:13px;margin:0;">Evaluate student reasons, past experience, and skills before admitting members</p>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;" id="requestsContainer"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px;" id="requestsContainer"></div>
         </div>
 
-        <!-- ─── Members Tab ─── -->
+        <!-- ─── 7. Members Roster Tab ─── -->
         <div id="tab-members" class="tab-content" style="display:none;">
-            <div style="margin-bottom:24px;">
-                <h2 style="font-family:'Playfair Display',serif;color:#2d0c5a;margin:0 0 4px;">Member Roster</h2>
-                <p style="color:#aaa;font-size:13px;margin:0;">All approved members of your club</p>
-            </div>
-            <div class="panel" style="max-width:700px;">
+            <div class="panel" style="max-width:850px;">
+                <div class="panel-title"><span>👥 Registered Club Members</span></div>
                 <div id="membersContainer"></div>
             </div>
         </div>
 
     </main>
 
+    <!-- Core Scripts -->
     <script src="data/seed-data.js"></script>
     <script src="js/db.js"></script>
     <script src="js/auth.js"></script>

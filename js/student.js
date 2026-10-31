@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!club) return;
       const div = document.createElement('div');
       div.className = 'my-club-card';
+      div.onclick = () => openClubDetails(club);
       div.innerHTML = `
         <img src="${club.logo}" class="my-club-logo" alt="${club.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(club.name.substring(0,2))}&background=4a1c84&color=fff'">
         <div class="my-club-info">
@@ -150,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let events;
     if (filter === 'upcoming')  events = DB.events.upcoming();
     else if (filter === 'rsvped') events = DB.events.getAll().filter(e => e.rsvps && e.rsvps.includes(user.id));
+    else if (filter === 'past') events = DB.events.getAll().filter(e => new Date(e.date) < new Date());
     else events = DB.events.getAll().sort((a,b) => new Date(a.date) - new Date(b.date));
     renderEvents('eventsContainer', events, 'student', user.id);
   }

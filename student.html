@@ -1,128 +1,504 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard — MITS StudentHub</title>
-    <meta name="description" content="Student dashboard for MITS StudentHub. Browse clubs, RSVP events, and manage your campus life.">
+    <meta name="description"
+        content="Student dashboard for MITS StudentHub. Browse clubs, RSVP events, register for workshops, and give feedback.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
-      * { box-sizing: border-box; }
-      body { background: #f4f2fa; font-family: Inter, sans-serif; color: #1a1a2e; margin: 0; }
+        * {
+            box-sizing: border-box;
+        }
 
-      /* ─── App Shell ─── */
-      .app-header {
-        background: linear-gradient(135deg, #2d0c5a, #4a1c84);
-        position: sticky; top: 0; z-index: 100;
-        box-shadow: 0 4px 30px rgba(74,28,132,0.3);
-      }
-      .header-inner {
-        max-width: 1400px; margin: 0 auto; padding: 0 32px;
-        display: flex; align-items: center; justify-content: space-between; height: 68px;
-      }
-      .app-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 800; color: #fff; text-decoration: none; }
-      .app-logo span { color: #36c5bc; }
-      .header-nav { display: flex; gap: 0; }
-      .nav-tab { padding: 22px 20px; color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none; text-decoration: none; display: flex; align-items: center; gap: 6px; }
-      .nav-tab:hover, .nav-tab.active { color: #fff; border-bottom-color: #36c5bc; }
-      .header-right { display: flex; align-items: center; gap: 16px; }
-      .user-chip { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 50px; cursor: pointer; transition: background 0.2s; }
-      .user-chip:hover { background: rgba(255,255,255,0.18); }
-      .user-avatar { width: 34px; height: 34px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); object-fit: cover; }
-      .user-name { color: #fff; font-size: 13px; font-weight: 700; }
-      .logout-link { color: rgba(255,255,255,0.5); font-size: 12px; text-decoration: none; font-weight: 600; transition: color 0.2s; }
-      .logout-link:hover { color: #fff; }
+        body {
+            background: #f4f2fa;
+            font-family: 'Inter', sans-serif;
+            color: #1a1a2e;
+            margin: 0;
+        }
 
-      /* ─── Page Body ─── */
-      .page-body { max-width: 1400px; margin: 0 auto; padding: 32px; }
+        /* App Shell */
+        .app-header {
+            background: linear-gradient(135deg, #2d0c5a, #4a1c84);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(74, 28, 132, 0.3);
+        }
 
-      /* ─── Welcome Banner ─── */
-      .welcome-banner {
-        background: linear-gradient(135deg, #4a1c84, #7a349c, #11a096);
-        border-radius: 24px; padding: 36px 40px;
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 32px; position: relative; overflow: hidden;
-      }
-      .welcome-banner::before { content:''; position:absolute;right:-60px;top:-60px;width:200px;height:200px;background:rgba(255,255,255,0.06);border-radius:50%; }
-      .welcome-banner::after { content:''; position:absolute;right:60px;bottom:-80px;width:280px;height:280px;background:rgba(255,255,255,0.04);border-radius:50%; }
-      .wb-text h1 { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.9rem; margin: 0 0 8px; }
-      .wb-text p { color: rgba(255,255,255,0.75); margin: 0; font-size: 14px; }
-      .wb-stats { display: flex; gap: 20px; z-index: 1; }
-      .wb-stat { text-align: center; background: rgba(255,255,255,0.12); padding: 16px 24px; border-radius: 16px; backdrop-filter: blur(8px); min-width: 100px; }
-      .wb-stat-num { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 800; color: #fff; }
-      .wb-stat-label { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+        .header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 68px;
+        }
 
-      /* ─── Section Heading ─── */
-      .section-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-      .section-head-left h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 800; color: #2d0c5a; margin: 0 0 4px; }
-      .section-head-left p { color: #aaa; font-size: 13px; margin: 0; }
-      .section-controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-      .s-search { padding: 10px 16px 10px 38px; border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 13px; outline: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' fill='none' stroke='%23bbb' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") 12px center / 15px no-repeat; transition: border-color 0.2s; min-width: 220px; }
-      .s-search:focus { border-color: #4a1c84; }
-      .s-select { padding: 10px 14px; border: 1.5px solid #e0e0e0; border-radius: 12px; font-size: 13px; outline: none; background: #fff; color: #555; cursor: pointer; font-family: Inter, sans-serif; }
-      .s-select:focus { border-color: #4a1c84; }
+        .app-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+        }
 
-      /* ─── Tabs ─── */
-      .tab-bar { display: flex; gap: 0; border-bottom: 2px solid #e8e8e8; margin-bottom: 24px; }
-      .tab-btn { padding: 14px 24px; font-size: 14px; font-weight: 600; color: #aaa; cursor: pointer; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; font-family: Inter, sans-serif; }
-      .tab-btn.active { color: #4a1c84; border-bottom-color: #4a1c84; }
-      .tab-btn:hover { color: #4a1c84; }
+        .app-logo span {
+            color: #36c5bc;
+        }
 
-      /* ─── My Clubs ─── */
-      .my-club-card { background: #fff; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; border: 1.5px solid #ede8f8; transition: all 0.2s; }
-      .my-club-card:hover { border-color: #4a1c84; transform: translateX(4px); box-shadow: 0 4px 20px rgba(74,28,132,0.08); }
-      .my-club-logo { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; }
-      .my-club-info h4 { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #2d0c5a; }
-      .my-club-info p { margin: 0; font-size: 12px; color: #aaa; }
+        .header-nav {
+            display: flex;
+            gap: 0;
+        }
 
-      /* ─── Announcements ─── */
-      .ann-card { background: #fff; border-radius: 16px; padding: 20px; border-left: 4px solid #4a1c84; margin-bottom: 12px; transition: box-shadow 0.2s; }
-      .ann-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-      .ann-club { font-size: 11px; font-weight: 700; color: #4a1c84; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-      .ann-msg { font-size: 14px; color: #333; line-height: 1.5; margin-bottom: 8px; }
-      .ann-time { font-size: 11px; color: #bbb; }
+        .nav-tab {
+            padding: 22px 18px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-      /* ─── Grids ─── */
-      .clubs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
-      .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-      .my-clubs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+        .nav-tab:hover,
+        .nav-tab.active {
+            color: #fff;
+            border-bottom-color: #36c5bc;
+        }
 
-      /* ─── Skeleton (inline) ─── */
-      .skeleton-card { background: #fff; border-radius: 16px; overflow: hidden; }
-      .skeleton-img { height: 120px; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-      .skeleton-line { height: 12px; border-radius: 6px; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
-      .skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; flex-shrink: 0; }
-      @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
-      @media (max-width: 768px) {
-        .header-nav { display: none; }
-        .page-body { padding: 16px; }
-        .welcome-banner { flex-direction: column; gap: 24px; padding: 28px 24px; }
-        .wb-stats { width: 100%; justify-content: space-between; }
-        .wb-stat { flex: 1; }
-      }
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-chip:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            object-fit: cover;
+        }
+
+        .user-name {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .logout-link {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .logout-link:hover {
+            color: #fff;
+        }
+
+        .page-body {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, #4a1c84, #7a349c, #11a096);
+            border-radius: 24px;
+            padding: 36px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            right: -60px;
+            top: -60px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+        }
+
+        .welcome-banner::after {
+            content: '';
+            position: absolute;
+            right: 60px;
+            bottom: -80px;
+            width: 280px;
+            height: 280px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 50%;
+        }
+
+        .wb-text h1 {
+            font-family: 'Playfair Display', serif;
+            color: #fff;
+            font-size: 1.9rem;
+            margin: 0 0 8px;
+        }
+
+        .wb-text p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .wb-stats {
+            display: flex;
+            gap: 16px;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .wb-stat {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.14);
+            padding: 14px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            min-width: 95px;
+        }
+
+        .wb-stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .wb-stat-label {
+            font-size: 10.5px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-top: 3px;
+        }
+
+        /* Quick Actions Bar */
+        .quick-actions-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .action-tile {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px 28px;
+            border: 1.5px solid #ede8f8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .action-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(74, 28, 132, 0.09);
+            border-color: #4a1c84;
+        }
+
+        .action-tile-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+        }
+
+        .action-tile-text h3 {
+            margin: 0 0 4px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #2d0c5a;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .action-tile-text p {
+            margin: 0;
+            font-size: 13px;
+            color: #777;
+        }
+
+        /* Section Heading */
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-head-left h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #2d0c5a;
+            margin: 0 0 4px;
+        }
+
+        .section-head-left p {
+            color: #888;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .section-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .s-select {
+            padding: 9px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 13px;
+            outline: none;
+            background: #fff;
+            color: #555;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .s-select:focus {
+            border-color: #4a1c84;
+        }
+
+        /* My Clubs */
+        .my-club-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 1.5px solid #ede8f8;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .my-club-card:hover {
+            border-color: #4a1c84;
+            transform: translateX(4px);
+            box-shadow: 0 4px 20px rgba(74, 28, 132, 0.08);
+        }
+
+        .my-club-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .my-club-info h4 {
+            margin: 0 0 4px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #2d0c5a;
+        }
+
+        .my-club-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Announcements */
+        .ann-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border-left: 4px solid #4a1c84;
+            margin-bottom: 12px;
+            transition: box-shadow 0.2s;
+        }
+
+        .ann-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .ann-club {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4a1c84;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .ann-msg {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .ann-time {
+            font-size: 11px;
+            color: #bbb;
+        }
+
+        /* Grids */
+        .clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 20px;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+        }
+
+        .my-clubs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+
+        /* Filter Chips */
+        .filter-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .chip {
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 12.5px;
+            font-weight: 700;
+            border: none;
+            background: #eee;
+            color: #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip.active,
+        .chip:hover {
+            background: #4a1c84;
+            color: #fff;
+        }
+
+        .clubs-search-trendy {
+            width: 100%;
+            max-width: 450px;
+            padding: 12px 18px;
+            border: 1.5px solid #ddd;
+            border-radius: 50px;
+            font-size: 13.5px;
+            outline: none;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+
+        .clubs-search-trendy:focus {
+            border-color: #4a1c84;
+        }
+
+        @media (max-width: 768px) {
+            .header-nav {
+                display: none;
+            }
+
+            .page-body {
+                padding: 16px;
+            }
+
+            .welcome-banner {
+                flex-direction: column;
+                gap: 20px;
+                padding: 24px;
+            }
+
+            .wb-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .quick-actions-bar {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-    <!-- ─── Header ─── -->
+    <!-- Header -->
     <header class="app-header">
         <div class="header-inner">
-            <a href="index.html" class="app-logo">STUDENT<span>HUB</span></a>
+            <a href="index.html" class="app-logo">MITS STUDENT<span>HUB</span></a>
             <nav class="header-nav">
-                <a class="nav-tab" href="#" data-tab="overview" onclick="switchTab('overview');return false;">🏠 Overview</a>
-                <a class="nav-tab" href="#" data-tab="clubs" onclick="switchTab('clubs');return false;">🏛️ Clubs</a>
-                <a class="nav-tab" href="#" data-tab="events" onclick="switchTab('events');return false;">📅 Events</a>
-                <a class="nav-tab" href="#" data-tab="feed" onclick="switchTab('feed');return false;">📢 Feed</a>
+                <a class="nav-tab active" href="#" data-tab="overview" onclick="switchTab('overview');return false;">🏠
+                    Overview</a>
+                <a class="nav-tab" href="#" data-tab="clubs" onclick="switchTab('clubs');return false;">🏛️ Explore
+                    Clubs</a>
+                <a class="nav-tab" href="#" data-tab="events" onclick="switchTab('events');return false;">📅 Events &
+                    RSVPs</a>
+                <a class="nav-tab" href="#" data-tab="feed" onclick="switchTab('feed');return false;">📢 Campus Feed</a>
             </nav>
             <div class="header-right">
                 <div class="user-chip">
-                    <img id="userAvatar" src="https://i.pravatar.cc/150" alt="Avatar" class="user-avatar">
-                    <span id="userName" class="user-name">Student</span>
+                    <img id="userAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
+                        alt="Avatar" class="user-avatar">
+                    <span id="userName" class="user-name">Priya Sharma</span>
                 </div>
                 <a href="#" class="logout-link" onclick="Auth.logout();return false;">Logout</a>
             </div>
@@ -131,16 +507,17 @@
 
     <main class="page-body">
 
-        <!-- ─── Welcome Banner ─── -->
+        <!-- Welcome Banner -->
         <div class="welcome-banner" data-aos="fade-down">
             <div class="wb-text">
-                <h1>Welcome back, <span id="welcomeName">Student</span>! 👋</h1>
-                <p>Here's what's happening on campus today — <span id="todayDate"></span></p>
+                <h1>Welcome back, <span id="welcomeName">Priya</span>! 👋</h1>
+                <p>Campus activities & active clubs at Madhav Institute of Technology & Science — <span
+                        id="todayDate"></span></p>
             </div>
             <div class="wb-stats">
                 <div class="wb-stat">
                     <div class="wb-stat-num" id="myClubCount">0</div>
-                    <div class="wb-stat-label">My Clubs</div>
+                    <div class="wb-stat-label">Joined Clubs</div>
                 </div>
                 <div class="wb-stat">
                     <div class="wb-stat-num" id="upcomingEventCount">0</div>
@@ -153,13 +530,31 @@
             </div>
         </div>
 
-        <!-- ─── Tab Content ─── -->
+        <!-- Quick Actions (Requirements 2 & 8) -->
+        <div class="quick-actions-bar">
+            <a href="event-register.html" class="action-tile">
+                <div class="action-tile-text">
+                    <h3>Register for Club Events →</h3>
+                    <p>Register for upcoming workshops, hackathons, and generate entry passes.</p>
+                </div>
+                <div class="action-tile-icon" style="background:#eef2ff;color:#4338ca;">🎟️</div>
+            </a>
+            <a href="event-feedback.html" class="action-tile">
+                <div class="action-tile-text">
+                    <h3>Submit Event Feedback ★</h3>
+                    <p>Rate recent speakers, logistics, and share your takeaways with club organizers.</p>
+                </div>
+                <div class="action-tile-icon" style="background:#fef3c7;color:#d97706;">💬</div>
+            </a>
+        </div>
+
+        <!-- ─── 1. Overview Tab ─── -->
         <div id="tab-overview" class="tab-content">
             <!-- My Clubs -->
             <div class="section-head">
                 <div class="section-head-left">
-                    <h2>My Clubs</h2>
-                    <p>Clubs you're a member of</p>
+                    <h2>My Active Memberships</h2>
+                    <p>Clubs you are an official student member of</p>
                 </div>
             </div>
             <div class="my-clubs-grid" id="myClubsGrid" style="margin-bottom:36px;"></div>
@@ -167,50 +562,47 @@
             <!-- Announcements -->
             <div class="section-head">
                 <div class="section-head-left">
-                    <h2>Announcements</h2>
-                    <p>Latest updates from your clubs</p>
+                    <h2>Club Announcements</h2>
+                    <p>Latest notices and meeting reminders from your clubs</p>
                 </div>
             </div>
             <div id="announcementsContainer"></div>
         </div>
 
+        <!-- ─── 2. Explore Clubs Tab ─── -->
         <div id="tab-clubs" class="tab-content" style="display:none;">
-            <div class="explore-section-dashboard">
-                <div class="decor-circle c1"></div>
-                <div class="decor-circle c2"></div>
-                <div class="decor-circle c3"></div>
-                <div class="decor-circle c4"></div>
-                
-                <div style="position:relative;z-index:10;">
-                    <div>
-                        <h2 class="section-title">Today's Trend</h2>
-                        <div class="section-divider"></div>
-                        <h3 style="text-align:center;font-family:'Inter',sans-serif;font-weight:800;font-size:1.8rem;margin-bottom:32px;">Season Collection</h3>
-                        <input type="text" id="clubSearch" class="clubs-search-trendy" placeholder="Search clubs...">
-                    </div>
-                    <div class="filter-chips" id="clubCatFilterChips">
-                        <button class="chip active" data-cat="">All</button>
-                        <button class="chip" data-cat="Technology">Technology</button>
-                        <button class="chip" data-cat="Arts">Arts</button>
-                        <button class="chip" data-cat="Academic">Academic</button>
-                        <button class="chip" data-cat="Sports">Sports</button>
-                        <button class="chip" data-cat="Social">Social</button>
-                    </div>
-                    <div class="clubs-grid" id="clubsContainer"></div>
-                </div>
+            <div style="margin-bottom:24px;">
+                <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;color:#2d0c5a;margin:0 0 4px;">Explore
+                    60+ Clubs & Societies</h2>
+                <p style="color:#777;font-size:13.5px;margin:0 0 20px;">Discover student teams, view executive
+                    leadership hierarchies, guest experts, and apply with your statement of purpose.</p>
+                <input type="text" id="clubSearch" class="clubs-search-trendy"
+                    placeholder="🔍 Search clubs by name, keywords, or skills...">
             </div>
+
+            <div class="filter-chips" id="clubCatFilterChips">
+                <button class="chip active" data-cat="">All Categories</button>
+                <button class="chip" data-cat="Technology">Technology</button>
+                <button class="chip" data-cat="Arts">Arts</button>
+                <button class="chip" data-cat="Academic">Academic</button>
+                <button class="chip" data-cat="Sports">Sports</button>
+                <button class="chip" data-cat="Social">Social</button>
+            </div>
+            <div class="clubs-grid" id="clubsContainer"></div>
         </div>
 
+        <!-- ─── 3. Events Tab ─── -->
         <div id="tab-events" class="tab-content" style="display:none;">
             <div class="section-head">
                 <div class="section-head-left">
-                    <h2>Upcoming Events</h2>
-                    <p>Don't miss out on campus activities</p>
+                    <h2>Campus Events & Workshops</h2>
+                    <p>Register online, receive your digital pass, and meet invited experts</p>
                 </div>
                 <div class="section-controls">
                     <select id="eventFilter" class="s-select">
-                        <option value="upcoming">Upcoming</option>
+                        <option value="upcoming">Upcoming Events</option>
                         <option value="rsvped">My RSVPs</option>
+                        <option value="past">Past Events (Leave Feedback)</option>
                         <option value="all">All Events</option>
                     </select>
                 </div>
@@ -218,11 +610,12 @@
             <div class="events-grid" id="eventsContainer"></div>
         </div>
 
+        <!-- ─── 4. Feed Tab ─── -->
         <div id="tab-feed" class="tab-content" style="display:none;">
             <div class="section-head">
                 <div class="section-head-left">
-                    <h2>Campus Feed</h2>
-                    <p>All announcements from all clubs</p>
+                    <h2>Campus Activity Feed</h2>
+                    <p>Live announcements across all MITS student chapters</p>
                 </div>
             </div>
             <div id="feedContainer"></div>
@@ -230,9 +623,8 @@
 
     </main>
 
-    <!-- Scripts -->
-    <script src="data/seed-data.js"></script>
-    <script src="js/db.js"></script>
+    <!-- Core Scripts -->
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/common.js"></script>
@@ -240,4 +632,5 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>AOS.init({ duration: 600, once: true });</script>
 </body>
+
 </html>

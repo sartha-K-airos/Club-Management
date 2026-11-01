@@ -1,49 +1,60 @@
-// js/auth.js — Session Management Service
+// js/auth.js — Authentication Service (Backend API)
 
 const Auth = (() => {
   const SESSION_KEY = 'mits_session';
+  let _currentUser = null;
 
-  function register(name, email, password, role = 'student') {
-    const existing = DB.users.getByEmail(email.trim().toLowerCase());
-    if (existing) return { success: false, error: 'Account already exists with that email.' };
-
-    const newUser = DB.users.insert({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password: password,
-      role: role
-    });
-
-    if (!newUser) return { success: false, error: 'Registration failed.' };
-
-    return login(email, password);
-  }
-
-  function login(email, password) {
-    const user = DB.users.getByEmail(email.trim().toLowerCase());
-    if (!user) return { success: false, error: 'No account found with that email.' };
-    if (user.password !== password) return { success: false, error: 'Incorrect password.' };
-
-    // Check maintenance mode (students blocked)
-    const s = DB.settings.get();
-    if (s.maintenanceMode && user.role === 'student') {
-      return { success: false, error: 'System is in maintenance mode. Please try again later.' };
+  async function register(name, email, password, role = 'student') {
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ name, email: email.trim().toLowerCase(), password, role })
+      });
+      const data = await res.json();
+      if (!res.ok) return { success: false, error: data.error || 'Registration failed.' };
+      _currentUser = data.user;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(_currentUser));
+      return { success: true, user: _currentUser };
+    } catch (e) {
+      return { success: false, error: e.message || 'Network error.' };
     }
-
-    // Store session (without password)
-    const session = { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    return { success: true, user: session };
   }
 
-  function logout() {
+  async function login(email, password) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password })
+      });
+      const data = await res.json();
+      if (!res.ok) return { success: false, error: data.error || 'Login failed.' };
+      _currentUser = data.user;
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(_currentUser));
+      return { success: true, user: _currentUser };
+    } catch (e) {
+      return { success: false, error: e.message || 'Network error.' };
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch (e) { /* ignore */ }
+    _currentUser = null;
     sessionStorage.removeItem(SESSION_KEY);
     window.location.href = 'index.html';
   }
 
   function getCurrentUser() {
-    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)) || null; }
-    catch { return null; }
+    if (_currentUser) return _currentUser;
+    try {
+      _currentUser = JSON.parse(sessionStorage.getItem(SESSION_KEY)) || null;
+      return _currentUser;
+    } catch { return null; }
   }
 
   function isLoggedIn() {
@@ -70,7 +81,24 @@ const Auth = (() => {
     window.location.href = routes[role] || 'index.html';
   }
 
-  return { register, login, logout, getCurrentUser, isLoggedIn, requireRole, redirectToDashboard };
+  // Check server session on load (optional — validates JWT is still valid)
+  async function checkSession() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+      if (res.ok) {
+        const data = await res.json();
+        _currentUser = data.user;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(_currentUser));
+      } else {
+        _currentUser = null;
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+    } catch (e) {
+      // Keep sessionStorage state if server unreachable
+    }
+  }
+
+  return { register, login, logout, getCurrentUser, isLoggedIn, requireRole, redirectToDashboard, checkSession };
 })();
 
 window.Auth = Auth;

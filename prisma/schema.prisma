@@ -1,0 +1,195 @@
+// Prisma schema for MITS Club & Society Management
+// Using SQLite — no enum types allowed
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  name            String
+  email           String   @unique
+  passwordHash    String
+  role            String   @default("student") // "student" | "club-leader" | "superadmin"
+  department      String?
+  rollNo          String?  @unique
+  year            String?
+  phone           String?
+  avatar          String?
+  clubMemberships String   @default("[]") // JSON string of club IDs
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Club {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  code        String   @unique
+  category    String?
+  description String?
+  leaderId    Int?
+  leaderName  String?
+  members     Int      @default(0)
+  budget      Float    @default(0)
+  status      String   @default("active") // "active" | "inactive"
+  icon        String?
+  color       String?
+  createdAt   DateTime @default(now())
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  clubId      Int
+  clubName    String?
+  date        String?
+  time        String?
+  venue       String?
+  isPaid      Boolean  @default(false)
+  price       Float    @default(0)
+  capacity    Int      @default(0)
+  status      String   @default("upcoming") // "upcoming" | "ongoing" | "completed" | "cancelled"
+  type        String?
+  image       String?
+  rsvps       String   @default("[]") // JSON string of user IDs
+  createdAt   DateTime @default(now())
+}
+
+model EventRegistration {
+  id               Int      @id @default(autoincrement())
+  registrationCode String   @unique
+  eventId          Int
+  studentId        Int
+  studentName      String
+  email            String?
+  rollNo           String?
+  branch           String?
+  year             String?
+  phone            String?
+  isPaid           Boolean  @default(false)
+  amountPaid       Float    @default(0)
+  paymentStatus    String   @default("PENDING") // "PENDING" | "PAID" | "FREE" | "FAILED"
+  paymentMethod    String?
+  transactionId    String?
+  gatewayOrderId   String?
+  gatewayPaymentId String?
+  gatewaySignature String?
+  passToken        String?  @unique
+  attended         Boolean  @default(false)
+  attendedAt       DateTime?
+  registeredAt     DateTime @default(now())
+}
+
+model JoinRequest {
+  id            Int      @id @default(autoincrement())
+  clubId        Int
+  clubName      String?
+  studentId     Int
+  studentName   String
+  email         String?
+  reason        String?
+  skills        String?
+  contributions String?
+  status        String   @default("pending") // "pending" | "approved" | "rejected"
+  createdAt     DateTime @default(now())
+}
+
+model Announcement {
+  id        Int      @id @default(autoincrement())
+  clubId    Int
+  clubName  String?
+  title     String?
+  message   String
+  priority  String   @default("normal") // "low" | "normal" | "high" | "urgent"
+  author    String?
+  createdAt DateTime @default(now())
+}
+
+model EventReport {
+  id                 Int      @id @default(autoincrement())
+  eventId            Int
+  eventTitle         String?
+  clubId             Int
+  clubName           String?
+  status             String   @default("submitted") // "submitted" | "approved" | "rejected"
+  submittedAt        DateTime @default(now())
+  superAdminRemarks  String?
+  data               String?  // JSON text for additional fields (venue, attendanceCount, budgetSpent, summary, etc.)
+}
+
+model ResourcePerson {
+  id           Int      @id @default(autoincrement())
+  eventId      Int
+  clubId       Int
+  name         String
+  designation  String?
+  organization String?
+  topic        String?
+  email        String?
+  phone        String?
+  avatar       String?
+  addedAt      DateTime @default(now())
+}
+
+model EventGallery {
+  id         Int      @id @default(autoincrement())
+  eventId    Int
+  eventTitle String?
+  clubId     Int
+  clubName   String?
+  imageUrl   String
+  caption    String?
+  uploadedBy Int?
+  uploadedAt DateTime @default(now())
+}
+
+model ClubHierarchy {
+  id      Int      @id @default(autoincrement())
+  clubId  Int
+  name    String
+  role    String?
+  email   String?
+  phone   String?
+  avatar  String?
+  order   Int      @default(0)
+  addedAt DateTime @default(now())
+}
+
+model EventFeedback {
+  id         Int      @id @default(autoincrement())
+  eventId    Int
+  eventTitle String?
+  clubId     Int
+  studentId  Int
+  studentName String?
+  rating     Int      @default(0)
+  comment    String?
+  categories String?  // JSON string
+  submittedAt DateTime @default(now())
+}
+
+model QuarterlyReport {
+  id                 Int      @id @default(autoincrement())
+  clubId             Int
+  clubName           String?
+  quarter            String?
+  year               String?
+  status             String   @default("submitted") // "submitted" | "approved" | "rejected"
+  superAdminFeedback String?
+  submittedAt        DateTime @default(now())
+  data               String?  // JSON text for additional fields
+}
+
+model Settings {
+  id               Int      @id @default(1)
+  maintenanceMode  Boolean  @default(false)
+  registrationOpen Boolean  @default(true)
+  collegeName      String   @default("MITS Gwalior")
+  data             String?  // JSON text for any extra fields
+}

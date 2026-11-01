@@ -53,9 +53,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
-// ── Start server ────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🚀 MITS StudentHub server running at http://localhost:${PORT}\n`);
-});
+// ── Start server (only if run directly, not when imported by Vercel) ───────
+if (require.main === module && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 MITS StudentHub server running at http://localhost:${PORT}\n`);
+  });
+}
 
 module.exports = app;

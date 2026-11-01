@@ -25,9 +25,14 @@ const API = (() => {
       credentials: 'same-origin',
       ...options
     });
+    const cType = res.headers.get('content-type') || '';
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: res.statusText }));
       throw new Error(err.error || 'Request failed');
+    }
+    if (!cType.includes('application/json')) {
+      console.warn('[API] Expected JSON but received non-JSON response from server.');
+      return {};
     }
     return res.json();
   }

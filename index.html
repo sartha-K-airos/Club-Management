@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="css/style.css">
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <style>
+    /* Ensure content is always visible even if AOS fails */
+    [data-aos] { opacity: 1 !important; transform: none !important; }
+
     /* ─── Landing Page Extras (Image 1 Style) ─── */
     .hero-section {
       min-height: 100vh;
@@ -1011,7 +1014,7 @@
       <a href="mailto:admin@mits.edu">Contact</a>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <button class="nav-login-btn" id="openLoginBtn">Login →</button>
+      <button class="nav-login-btn" id="openLoginBtn" onclick="document.getElementById('loginModal').classList.add('open')">Login →</button>
       <button class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -1222,7 +1225,6 @@
           </div>
         </div>
       </div>
-      </div>
 
       <!-- Register View -->
       <div id="registerView" style="display:none;">
@@ -1269,55 +1271,193 @@
   <script src="js/common.js"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <script>
-    // ─── Init ─────────────────────────────────────────────────────────────
-    DB.seed();
-    AOS.init({ duration: 700, once: true, offset: 60 });
-
-    // If already logged in, redirect to dashboard
-    if (Auth.isLoggedIn()) {
-      const u = Auth.getCurrentUser();
-      Auth.redirectToDashboard(u.role);
+    // ─── Direct DOM event bindings (immediate, no async dependency) ────────
+    const openLoginBtn = document.getElementById('openLoginBtn');
+    if (openLoginBtn) {
+      openLoginBtn.onclick = () => document.getElementById('loginModal').classList.add('open');
     }
 
-    // ─── Navbar scroll effect ─────────────────────────────────────────────
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) {
+      loginModal.addEventListener('click', function (e) {
+        if (e.target === this) this.classList.remove('open');
+      });
+    }
+
+    const hamburger = document.getElementById('hamburger');
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        document.getElementById('mobileNav').classList.toggle('open');
+      });
+    }
+
     window.addEventListener('scroll', () => {
-      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+      const nb = document.getElementById('navbar');
+      if (nb) nb.classList.toggle('scrolled', window.scrollY > 60);
     });
 
-    // ─── Hamburger ────────────────────────────────────────────────────────
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('mobileNav').classList.toggle('open');
-    });
+    // ─── Modal View Toggler ───────────────────────────────────────────────
+    window.toggleAuthView = function (view) {
+      const loginView = document.getElementById('loginView');
+      const registerView = document.getElementById('registerView');
+      if (view === 'register') {
+        if (loginView) loginView.style.display = 'none';
+        if (registerView) registerView.style.display = 'block';
+      } else {
+        if (registerView) registerView.style.display = 'none';
+        if (loginView) loginView.style.display = 'block';
+      }
+    };
 
-    // ─── Animated Stats ───────────────────────────────────────────────────
-    const clubs = DB.clubs.getAll();
-    const totalMembers = clubs.reduce((s, c) => s + (c.members || 0), 0);
-    const totalEvents = DB.events.getAll().length;
+    window.fillCred = function (email, pass) {
+      toggleAuthView('login');
+      const emailInput = document.getElementById('loginEmail');
+      const passInput = document.getElementById('loginPassword');
+      if (emailInput) emailInput.value = email;
+      if (passInput) passInput.value = pass;
+    };
 
-    setTimeout(() => {
-      UI.animateCount(document.getElementById('statClubs'), clubs.length);
-      UI.animateCount(document.getElementById('statStudents'), totalMembers);
-      UI.animateCount(document.getElementById('statEvents'), totalEvents);
-      UI.animateCount(document.getElementById('statCategories'), 5);
-    }, 500);
+    // ─── Login Form Submit Handler (proper async/await) ───────────────────
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const emailInput = document.getElementById('loginEmail');
+        const passInput = document.getElementById('loginPassword');
+        const errBox = document.getElementById('loginError');
+        const btn = document.getElementById('loginSubmit');
+        const email = emailInput ? emailInput.value.trim() : '';
+        const pass = passInput ? passInput.value : '';
 
-    // ─── Landing Clubs Render ─────────────────────────────────────────────
+        // Clear previous errors
+        if (errBox) {
+          errBox.classList.remove('show');
+          errBox.textContent = '';
+        }
+        if (emailInput) emailInput.classList.remove('error');
+        if (passInput) passInput.classList.remove('error');
+
+        // Validation
+        let valid = true;
+        if (!email || !email.includes('@')) {
+          const emailErr = document.getElementById('emailError');
+          if (emailErr) emailErr.classList.add('show');
+          if (emailInput) emailInput.classList.add('error');
+          valid = false;
+        }
+        if (!pass) {
+          const passErr = document.getElementById('passError');
+          if (passErr) passErr.classList.add('show');
+          if (passInput) passInput.classList.add('error');
+          valid = false;
+        }
+        if (!valid) return;
+
+        UI.setButtonLoading(btn, true);
+        try {
+          const result = await Auth.login(email, pass);
+          if (result && result.success) {
+            UI.showToast('Welcome back, ' + result.user.name + '! 👋', 'success');
+            setTimeout(() => Auth.redirectToDashboard(result.user.role), 500);
+          } else {
+            if (errBox) {
+              errBox.textContent = (result && result.error) ? result.error : 'Invalid email or password.';
+              errBox.classList.add('show');
+            }
+            UI.setButtonLoading(btn, false);
+          }
+        } catch (err) {
+          console.error('Login error:', err);
+          if (errBox) {
+            errBox.textContent = err.message || 'Login failed. Please check network connection.';
+            errBox.classList.add('show');
+          }
+          UI.setButtonLoading(btn, false);
+        }
+      });
+    }
+
+    // ─── Register Form Submit Handler (proper async/await) ────────────────
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+      registerForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('regName');
+        const emailInput = document.getElementById('regEmail');
+        const passInput = document.getElementById('regPassword');
+        const errBox = document.getElementById('registerError');
+        const btn = document.getElementById('registerSubmit');
+
+        const name = nameInput ? nameInput.value.trim() : '';
+        const email = emailInput ? emailInput.value.trim() : '';
+        const pass = passInput ? passInput.value : '';
+
+        if (errBox) {
+          errBox.classList.remove('show');
+          errBox.textContent = '';
+        }
+        [nameInput, emailInput, passInput].forEach(el => el && el.classList.remove('error'));
+
+        let valid = true;
+        if (!name) {
+          if (nameInput) nameInput.classList.add('error');
+          valid = false;
+        }
+        if (!email || !email.includes('@')) {
+          if (emailInput) emailInput.classList.add('error');
+          valid = false;
+        }
+        if (!pass || pass.length < 6) {
+          if (passInput) passInput.classList.add('error');
+          if (errBox) {
+            errBox.textContent = 'Password must be at least 6 characters.';
+            errBox.classList.add('show');
+          }
+          valid = false;
+        }
+        if (!valid) return;
+
+        UI.setButtonLoading(btn, true);
+        try {
+          const result = await Auth.register(name, email, pass, 'student');
+          if (result && result.success) {
+            UI.showToast('Account created! Welcome, ' + result.user.name + '! 🎉', 'success');
+            setTimeout(() => Auth.redirectToDashboard(result.user.role), 500);
+          } else {
+            if (errBox) {
+              errBox.textContent = (result && result.error) ? result.error : 'Registration failed.';
+              errBox.classList.add('show');
+            }
+            UI.setButtonLoading(btn, false);
+          }
+        } catch (err) {
+          console.error('Registration error:', err);
+          if (errBox) {
+            errBox.textContent = err.message || 'Registration failed.';
+            errBox.classList.add('show');
+          }
+          UI.setButtonLoading(btn, false);
+        }
+      });
+    }
+
+    // ─── Filter chips & Clubs rendering ───────────────────────────────────
     let currentCategory = 'All';
     let searchQuery = '';
 
     function renderLandingClubs() {
-      let filtered = DB.clubs.getAll();
+      const container = document.getElementById('landingClubsContainer');
+      if (!container) return;
+      let filtered = API.clubs ? API.clubs.getAll() : [];
       if (currentCategory !== 'All') filtered = filtered.filter(c => c.category === currentCategory);
       if (searchQuery) filtered = filtered.filter(c =>
-        c.name.toLowerCase().includes(searchQuery) ||
-        c.description.toLowerCase().includes(searchQuery)
+        (c.name && c.name.toLowerCase().includes(searchQuery)) ||
+        (c.description && c.description.toLowerCase().includes(searchQuery))
       );
-      filtered.sort((a, b) => b.members - a.members);
+      filtered.sort((a, b) => (b.members || 0) - (a.members || 0));
       renderClubs('landingClubsContainer', filtered, 'public');
     }
-    renderLandingClubs();
 
-    // Filter chips
     document.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -1327,7 +1467,6 @@
       });
     });
 
-    // Search
     const searchInput = document.getElementById('landingSearch');
     if (searchInput) {
       searchInput.addEventListener('input', UI.debounce(() => {
@@ -1336,115 +1475,68 @@
       }, 250));
     }
 
-
-
-    // ─── Login Modal ──────────────────────────────────────────────────────
-    document.getElementById('openLoginBtn').onclick = () => document.getElementById('loginModal').classList.add('open');
-    document.getElementById('getStartedBtn').onclick = () => document.getElementById('loginModal').classList.add('open');
-    document.getElementById('loginModal').addEventListener('click', function (e) {
-      if (e.target === this) this.classList.remove('open');
-    });
-
-    window.toggleAuthView = function (view) {
-      if (view === 'register') {
-        document.getElementById('loginView').style.display = 'none';
-        document.getElementById('registerView').style.display = 'block';
-      } else {
-        document.getElementById('registerView').style.display = 'none';
-        document.getElementById('loginView').style.display = 'block';
-      }
-    };
-
-    document.getElementById('loginForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const pass = document.getElementById('loginPassword').value;
-      const errBox = document.getElementById('loginError');
-      const btn = document.getElementById('loginSubmit');
-
-      // Clear errors
-      errBox.classList.remove('show');
-      document.getElementById('loginEmail').classList.remove('error');
-      document.getElementById('loginPassword').classList.remove('error');
-
-      // Validate
-      let valid = true;
-      if (!email || !email.includes('@')) {
-        document.getElementById('emailError').classList.add('show');
-        document.getElementById('loginEmail').classList.add('error');
-        valid = false;
-      }
-      if (!pass) {
-        document.getElementById('passError').classList.add('show');
-        document.getElementById('loginPassword').classList.add('error');
-        valid = false;
-      }
-      if (!valid) return;
-
-      UI.setButtonLoading(btn, true);
-      setTimeout(() => {
-        const result = Auth.login(email, pass);
-        if (result.success) {
-          UI.showToast(`Welcome back, ${result.user.name}! 👋`, 'success');
-          setTimeout(() => Auth.redirectToDashboard(result.user.role), 600);
+    // ─── Main Lifecycle Initialization ────────────────────────────────────
+    (async () => {
+      // 1. Guard AOS so missing CDN never breaks page
+      try {
+        if (window.AOS) {
+          AOS.init({ duration: 700, once: true, offset: 60 });
         } else {
-          errBox.textContent = result.error;
-          errBox.classList.add('show');
-          UI.setButtonLoading(btn, false);
+          document.querySelectorAll('[data-aos]').forEach(el => el.removeAttribute('data-aos'));
         }
-      }, 400);
-    });
-
-    document.getElementById('registerForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      const pass = document.getElementById('regPassword').value;
-      const errBox = document.getElementById('registerError');
-      const btn = document.getElementById('registerSubmit');
-
-      // Clear errors
-      errBox.classList.remove('show');
-      ['regName', 'regEmail', 'regPassword'].forEach(id => document.getElementById(id).classList.remove('error'));
-
-      // Validate
-      let valid = true;
-      if (!name) {
-        document.getElementById('regName').classList.add('error');
-        valid = false;
+      } catch (e) {
+        document.querySelectorAll('[data-aos]').forEach(el => el.removeAttribute('data-aos'));
       }
-      if (!email || !email.includes('@')) {
-        document.getElementById('regEmail').classList.add('error');
-        valid = false;
-      }
-      if (!pass || pass.length < 6) {
-        document.getElementById('regPassword').classList.add('error');
-        errBox.textContent = 'Password must be at least 6 characters.';
-        errBox.classList.add('show');
-        valid = false;
-      }
-      if (!valid) return;
 
-      UI.setButtonLoading(btn, true);
-      setTimeout(() => {
-        const result = Auth.register(name, email, pass, 'student');
-        if (result.success) {
-          UI.showToast(`Account created! Welcome to MITS StudentHub, ${result.user.name}! 🎉`, 'success');
-          setTimeout(() => Auth.redirectToDashboard(result.user.role), 600);
-        } else {
-          errBox.textContent = result.error;
-          errBox.classList.add('show');
-          UI.setButtonLoading(btn, false);
+      // 2. Redirect if already authenticated
+      try {
+        if (Auth.isLoggedIn()) {
+          const u = Auth.getCurrentUser();
+          if (u && u.role) {
+            Auth.redirectToDashboard(u.role);
+            return;
+          }
         }
-      }, 400);
-    });
+      } catch (e) {}
 
-    function fillCred(email, pass) {
-      toggleAuthView('login');
-      document.getElementById('loginEmail').value = email;
-      document.getElementById('loginPassword').value = pass;
-    }
+      // 3. Show placeholder while loading from Supabase
+      const container = document.getElementById('landingClubsContainer');
+      if (container && (!API.clubs || API.clubs.getAll().length === 0)) {
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px 20px;color:#005cff;font-weight:600;font-size:1.05rem;">⚡ Loading campus clubs...</div>';
+      }
+
+      // 4. Await Supabase live cache
+      try {
+        await API.ready();
+      } catch (e) {
+        console.warn('API ready warning:', e);
+      }
+
+      // 5. Render clubs once cache is populated
+      renderLandingClubs();
+
+      // 6. Safe animated counters
+      try {
+        const clubs = API.clubs ? API.clubs.getAll() : [];
+        const totalMembers = clubs.reduce((s, c) => s + (c.members || 0), 0);
+        const totalEvents = API.events ? API.events.getAll().length : 0;
+
+        const statClubs = document.getElementById('statClubs');
+        const statStudents = document.getElementById('statStudents');
+        const statEvents = document.getElementById('statEvents');
+        const statCategories = document.getElementById('statCategories');
+
+        if (statClubs) UI.animateCount(statClubs, clubs.length);
+        if (statStudents) UI.animateCount(statStudents, totalMembers);
+        if (statEvents) UI.animateCount(statEvents, totalEvents);
+        if (statCategories) UI.animateCount(statCategories, 5);
+      } catch (e) {}
+
+      // 7. Refresh AOS animations if active
+      try {
+        if (window.AOS) AOS.refresh();
+      } catch (e) {}
+    })();
   </script>
 </body>
-
 </html>

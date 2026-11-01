@@ -188,12 +188,13 @@ const UI = (() => {
 
   // ─── Animate counting numbers ─────────────────────────────────────────────
   function animateCount(el, target, duration = 1200) {
+    if (!el) return;
     let startTime = null;
     const step = (timestamp) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      el.textContent = Math.floor(eased * target).toLocaleString('en-IN');
+      if (el) el.textContent = Math.floor(eased * target).toLocaleString('en-IN');
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);

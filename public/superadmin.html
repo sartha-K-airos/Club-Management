@@ -391,12 +391,26 @@
                 <div class="user-chip">
                     <img id="userAvatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150"
                         class="user-avatar" alt="Admin">
-                    <span id="userName" class="user-name">Dr. Admin</span>
+                    <span id="userName" class="user-name">Super Admin</span>
                 </div>
                 <a href="#" class="logout-link" onclick="Auth.logout();return false;">Logout</a>
             </div>
         </div>
     </header>
+
+    <script id="mits_session_hydration_admin">
+      (function() {
+        try {
+          var s = JSON.parse(sessionStorage.getItem('mits_session'));
+          if (s && s.name) {
+            var un = document.getElementById('userName');
+            var ua = document.getElementById('userAvatar');
+            if (un) un.textContent = s.name;
+            if (ua && s.avatar) ua.src = s.avatar;
+          }
+        } catch(e) {}
+      })();
+    </script>
 
     <main class="page-body">
 

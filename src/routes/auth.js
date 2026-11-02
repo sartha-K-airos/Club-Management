@@ -90,6 +90,21 @@ router.post('/register', async (req, res) => {
   }
 });
 
+let _maintenanceCache = { enabled: false, checkedAt: 0 };
+async function isMaintenanceMode() {
+  const now = Date.now();
+  if (now - _maintenanceCache.checkedAt < 60000) {
+    return _maintenanceCache.enabled;
+  }
+  try {
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    _maintenanceCache = { enabled: !!settings?.maintenanceMode, checkedAt: now };
+    return _maintenanceCache.enabled;
+  } catch (e) {
+    return false;
+  }
+}
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
@@ -99,7 +114,8 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
@@ -109,10 +125,10 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    // Check maintenance mode for students
+    // Check maintenance mode for students with fast memory cache
     if (user.role === 'student') {
-      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
-      if (settings?.maintenanceMode) {
+      const inMaintenance = await isMaintenanceMode();
+      if (inMaintenance) {
         return res.status(503).json({ error: 'System is under maintenance. Please try again later.' });
       }
     }

@@ -102,7 +102,7 @@ const API = (() => {
   // ─── Users ────────────────────────────────────────────────────────────────
   const users = {
     getAll: () => _cache.users,
-    getById: (id) => _cache.users.find(u => u.id === id) || null,
+    getById: (id) => _cache.users.find(u => Number(u.id) === Number(id)) || null,
     getByEmail: (email) => _cache.users.find(u => u.email === (email || '').toLowerCase()) || null,
     insert: async (data) => {
       const result = await _fetch('/api/users', { method: 'POST', body: JSON.stringify(data) });
@@ -129,7 +129,7 @@ const API = (() => {
   // ─── Clubs ────────────────────────────────────────────────────────────────
   const clubs = {
     getAll: () => _cache.clubs,
-    getById: (id) => _cache.clubs.find(c => c.id === id) || null,
+    getById: (id) => _cache.clubs.find(c => Number(c.id) === Number(id)) || null,
     query: (fn) => _cache.clubs.filter(fn),
     insert: async (data) => {
       const result = await _fetch('/api/clubs', { method: 'POST', body: JSON.stringify(data) });
@@ -156,7 +156,7 @@ const API = (() => {
   // ─── Events ───────────────────────────────────────────────────────────────
   const events = {
     getAll: () => _cache.events,
-    getById: (id) => _cache.events.find(e => e.id === id) || null,
+    getById: (id) => _cache.events.find(e => Number(e.id) === Number(id)) || null,
     query: (fn) => _cache.events.filter(fn),
     upcoming: () => _cache.events
       .filter(e => new Date(e.date) >= new Date())
@@ -225,9 +225,9 @@ const API = (() => {
   // ─── Event Reports ────────────────────────────────────────────────────────
   const eventReports = {
     getAll: () => [..._cache.eventReports].sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)),
-    getById: (id) => _cache.eventReports.find(r => r.id === id) || null,
-    getByClub: (clubId) => _cache.eventReports.filter(r => r.clubId === clubId),
-    getByEvent: (eventId) => _cache.eventReports.find(r => r.eventId === eventId) || null,
+    getById: (id) => _cache.eventReports.find(r => Number(r.id) === Number(id)) || null,
+    getByClub: (clubId) => _cache.eventReports.filter(r => Number(r.clubId) === Number(clubId)),
+    getByEvent: (eventId) => _cache.eventReports.find(r => Number(r.eventId) === Number(eventId)) || null,
     insert: async (data) => {
       const result = await _fetch('/api/event-reports', { method: 'POST', body: JSON.stringify(data) });
       await refreshCache();
@@ -245,9 +245,9 @@ const API = (() => {
   // ─── Resource Persons ─────────────────────────────────────────────────────
   const resourcePersons = {
     getAll: () => _cache.resourcePersons,
-    getById: (id) => _cache.resourcePersons.find(p => p.id === id) || null,
-    getByClub: (clubId) => _cache.resourcePersons.filter(p => p.clubId === clubId),
-    getByEvent: (eventId) => _cache.resourcePersons.filter(p => p.eventId === eventId),
+    getById: (id) => _cache.resourcePersons.find(p => Number(p.id) === Number(id)) || null,
+    getByClub: (clubId) => _cache.resourcePersons.filter(p => Number(p.clubId) === Number(clubId)),
+    getByEvent: (eventId) => _cache.resourcePersons.filter(p => Number(p.eventId) === Number(eventId)),
     insert: async (data) => {
       const result = await _fetch('/api/resource-persons', { method: 'POST', body: JSON.stringify(data) });
       await refreshCache();
@@ -263,9 +263,9 @@ const API = (() => {
   // ─── Event Gallery ────────────────────────────────────────────────────────
   const eventGallery = {
     getAll: () => [..._cache.eventGallery].sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)),
-    getById: (id) => _cache.eventGallery.find(g => g.id === id) || null,
-    getByClub: (clubId) => _cache.eventGallery.filter(g => g.clubId === clubId),
-    getByEvent: (eventId) => _cache.eventGallery.filter(g => g.eventId === eventId),
+    getById: (id) => _cache.eventGallery.find(g => Number(g.id) === Number(id)) || null,
+    getByClub: (clubId) => _cache.eventGallery.filter(g => Number(g.clubId) === Number(clubId)),
+    getByEvent: (eventId) => _cache.eventGallery.filter(g => Number(g.eventId) === Number(eventId)),
     insert: async (data) => {
       const result = await _fetch('/api/event-gallery', { method: 'POST', body: JSON.stringify(data) });
       await refreshCache();
@@ -281,8 +281,8 @@ const API = (() => {
   // ─── Club Hierarchy ───────────────────────────────────────────────────────
   const clubHierarchy = {
     getAll: () => _cache.clubHierarchy,
-    getById: (id) => _cache.clubHierarchy.find(h => h.id === id) || null,
-    getByClub: (clubId) => _cache.clubHierarchy.filter(h => h.clubId === clubId).sort((a, b) => (a.order || 99) - (b.order || 99)),
+    getById: (id) => _cache.clubHierarchy.find(h => Number(h.id) === Number(id)) || null,
+    getByClub: (clubId) => _cache.clubHierarchy.filter(h => Number(h.clubId) === Number(clubId)).sort((a, b) => (a.order || 99) - (b.order || 99)),
     insert: async (data) => {
       const result = await _fetch('/api/club-hierarchy', { method: 'POST', body: JSON.stringify(data) });
       await refreshCache();

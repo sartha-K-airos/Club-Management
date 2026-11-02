@@ -48,6 +48,10 @@ router.put('/:id', authenticate, async (req, res) => {
     const id = parseInt(req.params.id);
     const data = { ...req.body };
     delete data.id;
+    if (data.logo && !data.icon) {
+      data.icon = data.logo;
+    }
+    delete data.logo;
     const club = await prisma.club.update({ where: { id }, data });
     const dataRouter = require('./data');
     if (dataRouter.invalidateCache) dataRouter.invalidateCache();

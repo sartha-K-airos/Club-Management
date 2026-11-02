@@ -54,7 +54,14 @@ router.get('/', async (req, res) => {
 
     const payload = {
       users: users.map(sanitizeUser),
-      clubs,
+      clubs: clubs.map(c => {
+        const logoUrl = c.icon || c.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent((c.name || 'CL').substring(0, 2))}&background=4a1c84&color=fff&bold=true`;
+        return {
+          ...c,
+          icon: logoUrl,
+          logo: logoUrl
+        };
+      }),
       events: events.map(e => ({ ...e, rsvps: parseJSON(e.rsvps, []) })),
       joinRequests,
       announcements,

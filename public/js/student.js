@@ -1,20 +1,24 @@
 // js/student.js — Full Student Dashboard Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await API.init();
-
-  // ─── Auth Guard ──────────────────────────────────────────────────────────
+  // ─── Auth Guard (synchronous, 0ms redirect if unauthorized) ───────────────
   const currentUser = Auth.requireRole('student');
   if (!currentUser) return;
 
-  // Get full user from API for fresh data
-  let user = API.users.getById(currentUser.id);
+  // Render header immediately from session storage (0ms instant display)
+  const userEl = document.getElementById('userName');
+  const welcomeEl = document.getElementById('welcomeName');
+  const avatarEl = document.getElementById('userAvatar');
+  const dateEl = document.getElementById('todayDate');
+  if (userEl) userEl.textContent = currentUser.name;
+  if (welcomeEl) welcomeEl.textContent = currentUser.name.split(' ')[0];
+  if (avatarEl) avatarEl.src = currentUser.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name) + '&background=4a1c84&color=fff');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
 
-  // ─── Header ──────────────────────────────────────────────────────────────
-  document.getElementById('userName').textContent = user.name;
-  document.getElementById('welcomeName').textContent = user.name.split(' ')[0];
-  document.getElementById('userAvatar').src = user.avatar;
-  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+  // Await cache ready (resolves in 0ms from sessionStorage fast cache)
+  await API.ready();
+
+  let user = API.users.getById(currentUser.id) || currentUser;
 
   // ─── Tab System ──────────────────────────────────────────────────────────
   window.switchTab = function (tabName) {
@@ -34,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   switchTab('overview');
 
   // ─── Welcome Stats ────────────────────────────────────────────────────────
-  function refreshUser() { user = API.users.getById(currentUser.id); }
+  function refreshUser() { user = API.users.getById(currentUser.id) || currentUser; }
 
   function updateWelcomeStats() {
     refreshUser();
@@ -68,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.className = 'my-club-card';
       div.onclick = () => openClubDetails(club);
       div.innerHTML = `
-        <img src="${club.logo}" class="my-club-logo" alt="${club.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(club.name.substring(0, 2))}&background=4a1c84&color=fff'">
+        <img src="${club.icon || club.logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent((club.name || 'CL').substring(0, 2)) + '&background=4a1c84&color=fff')}" class="my-club-logo" alt="${club.name}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((club.name || 'CL').substring(0, 2))}&background=4a1c84&color=fff'">
         <div class="my-club-info">
           <h4>${club.name}</h4>
           <p>${club.category} · ${club.members} members</p>

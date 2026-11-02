@@ -1,16 +1,16 @@
 // js/superadmin.js — Full SuperAdmin Operations & Institutional Governance
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await API.init();
-
-  // ─── Auth Guard ──────────────────────────────────────────────────────────
+  // ─── Auth Guard (0ms synchronous check) ──────────────────────────────────
   const currentUser = Auth.requireRole('superadmin');
   if (!currentUser) return;
 
   const nameEl = document.getElementById('userName');
   const avatarEl = document.getElementById('userAvatar');
   if (nameEl) nameEl.textContent = currentUser.name;
-  if (avatarEl && currentUser.avatar) avatarEl.src = currentUser.avatar;
+  if (avatarEl) avatarEl.src = currentUser.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name) + '&background=4a1c84&color=fff');
+
+  await API.ready();
 
   // ─── Tab System ──────────────────────────────────────────────────────────
   window.switchTab = function (tabName) {

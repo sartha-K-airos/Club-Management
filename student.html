@@ -496,9 +496,9 @@
             </nav>
             <div class="header-right">
                 <div class="user-chip">
-                    <img id="userAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
+                    <img id="userAvatar" src="https://ui-avatars.com/api/?name=Student&background=4a1c84&color=fff"
                         alt="Avatar" class="user-avatar">
-                    <span id="userName" class="user-name">Priya Sharma</span>
+                    <span id="userName" class="user-name">Student</span>
                 </div>
                 <a href="#" class="logout-link" onclick="Auth.logout();return false;">Logout</a>
             </div>
@@ -510,7 +510,7 @@
         <!-- Welcome Banner -->
         <div class="welcome-banner" data-aos="fade-down">
             <div class="wb-text">
-                <h1>Welcome back, <span id="welcomeName">Priya</span>! 👋</h1>
+                <h1>Welcome back, <span id="welcomeName">Student</span>! 👋</h1>
                 <p>Campus activities & active clubs at Madhav Institute of Technology & Science — <span
                         id="todayDate"></span></p>
             </div>
@@ -529,6 +529,24 @@
                 </div>
             </div>
         </div>
+
+        <script id="mits_session_hydration_student">
+          (function() {
+            try {
+              var s = JSON.parse(sessionStorage.getItem('mits_session'));
+              if (s && s.name) {
+                var un = document.getElementById('userName');
+                var wn = document.getElementById('welcomeName');
+                var ua = document.getElementById('userAvatar');
+                if (un) un.textContent = s.name;
+                if (wn) wn.textContent = s.name.split(' ')[0];
+                if (ua) {
+                  ua.src = s.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(s.name) + '&background=4a1c84&color=fff');
+                }
+              }
+            } catch(e) {}
+          })();
+        </script>
 
         <!-- Quick Actions (Requirements 2 & 8) -->
         <div class="quick-actions-bar">

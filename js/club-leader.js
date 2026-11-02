@@ -1,26 +1,39 @@
 // js/club-leader.js — Full Club Leader Operations & Event Management Logic
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await API.ready();
-
-  // ─── Auth Guard ──────────────────────────────────────────────────────────
+  // ─── Auth Guard (0ms synchronous check) ──────────────────────────────────
   const currentUser = Auth.requireRole('club-leader');
   if (!currentUser) return;
 
-  // ─── Header ──────────────────────────────────────────────────────────────
+  // ─── Header Instant Render ───────────────────────────────────────────────
   const userEl = document.getElementById('userName');
   const avatarEl = document.getElementById('userAvatar');
   if (userEl) userEl.textContent = currentUser.name;
-  if (avatarEl && currentUser.avatar) avatarEl.src = currentUser.avatar;
+  if (avatarEl) avatarEl.src = currentUser.avatar || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name) + '&background=4a1c84&color=fff');
+
+  await API.ready();
 
   // ─── Find Managed Club ────────────────────────────────────────────────────
-  let managedClub = DB.clubs.query(c => c.leaderId === currentUser.id)[0];
-  if (!managedClub) {
-    // Fallback to first club if test leader
-    managedClub = DB.clubs.getAll()[0];
+  let managedClub = DB.clubs.query(c => Number(c.leaderId) === Number(currentUser.id))[0];
+  if (!managedClub && currentUser.name) {
+    managedClub = DB.clubs.query(c => c.leaderName && c.leaderName.trim().toLowerCase() === currentUser.name.trim().toLowerCase())[0];
   }
+
   if (!managedClub) {
-    document.querySelector('.club-banner').innerHTML = `<div style="color:#fff;padding:20px;"><h2>No Club Assigned</h2><p>You are not assigned as leader of any club. Contact the Super Admin.</p></div>`;
+    const banner = document.querySelector('.club-banner');
+    if (banner) {
+      banner.innerHTML = `
+        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);border-radius:18px;padding:36px 24px;text-align:center;width:100%;border:1px solid rgba(255,255,255,0.2);">
+          <div style="font-size:3rem;margin-bottom:12px;">⏳</div>
+          <h2 style="font-family:'Playfair Display',serif;color:#fff;margin:0 0 10px;font-size:1.6rem;">Leadership Assignment Pending</h2>
+          <p style="color:rgba(255,255,255,0.9);font-size:14.5px;max-width:540px;margin:0 auto 12px;line-height:1.6;">
+            Welcome, <strong>${currentUser.name}</strong>! Your account has Club Leader privileges.
+            The Super Admin has not assigned you to lead a specific club charter yet.
+          </p>
+          <p style="color:rgba(255,255,255,0.65);font-size:12.5px;margin:0;">Once assigned from the Super Admin portal, your full club dashboard and operations will activate automatically.</p>
+        </div>`;
+    }
+    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
     return;
   }
 
@@ -29,11 +42,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ─── Populate Banner ──────────────────────────────────────────────────────
   function refreshBanner() {
-    const club = DB.clubs.getById(managedClub.id);
+    const club = DB.clubs.getById(managedClub.id) || managedClub;
     if (!club) return;
     document.getElementById('clubName').textContent = club.name;
-    document.getElementById('clubDesc').textContent = `${club.category} · ${(club.description || '').substring(0, 95)}...`;
-    if (club.logo) document.getElementById('clubLogo').src = club.logo;
+    document.getElementById('clubDesc').textContent = `${club.category || 'General'} · ${(club.description || '').substring(0, 95)}...`;
+
+    const logoUrl = club.icon || club.logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent((club.name || 'CL').substring(0, 2)) + '&background=4a1c84&color=fff&bold=true');
+    const logoEl = document.getElementById('clubLogo');
+    if (logoEl) logoEl.src = logoUrl;
+    const previewEl = document.getElementById('clubLogoPreview');
+    if (previewEl) { previewEl.src = logoUrl; previewEl.style.display = 'block'; }
+    const urlInput = document.getElementById('clubLogoUrlEdit');
+    if (urlInput) urlInput.value = club.icon || club.logo || '';
+
     const descEdit = document.getElementById('clubDescEdit');
     if (descEdit) descEdit.value = club.description || '';
 
@@ -185,11 +206,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('');
   }
 
-  window.saveClubInfo = function () {
+  // ─── Club Logo Upload & Profile Update ────────────────────────────────────
+  window.triggerClubLogoUpload = function () {
+    const input = document.getElementById('clubLogoFileInput');
+    if (input) input.click();
+  };
+
+  window.handleClubLogoFile = function (event) {
+    const file = event.target && event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (file.size > 2.5 * 1024 * 1024) {
+      UI.showToast('Please select an image smaller than 2.5MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const dataUrl = e.target.result;
+      const urlInput = document.getElementById('clubLogoUrlEdit');
+      if (urlInput) urlInput.value = dataUrl;
+      const preview = document.getElementById('clubLogoPreview');
+      if (preview) { preview.src = dataUrl; preview.style.display = 'block'; }
+      const bannerLogo = document.getElementById('clubLogo');
+      if (bannerLogo) bannerLogo.src = dataUrl;
+      UI.showToast('Logo chosen! Click "Save Club Profile & Logo" to apply changes.', 'info');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.saveClubInfo = async function () {
+    if (!managedClub) {
+      UI.showToast('No managed club assigned to update.', 'error');
+      return;
+    }
     const desc = document.getElementById('clubDescEdit').value.trim();
-    DB.clubs.update(managedClub.id, { description: desc });
-    UI.showToast('Club description updated.', 'success');
-    refreshBanner();
+    const logoUrl = document.getElementById('clubLogoUrlEdit') ? document.getElementById('clubLogoUrlEdit').value.trim() : '';
+    const btn = document.getElementById('saveClubInfoBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+    try {
+      const updates = { description: desc };
+      if (logoUrl) updates.icon = logoUrl;
+      await API.clubs.update(managedClub.id, updates);
+      managedClub.description = desc;
+      if (logoUrl) { managedClub.icon = logoUrl; managedClub.logo = logoUrl; }
+      UI.showToast('Club profile and logo updated successfully! 🎉', 'success');
+      refreshBanner();
+    } catch (err) {
+      console.error('Save club info failed:', err);
+      UI.showToast('Failed to save club info: ' + err.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '💾 Save Club Profile & Logo'; }
+    }
   };
 
   // ─── RENDER LEADER EVENTS (Clean, Simple Grid Interface) ───────────────────

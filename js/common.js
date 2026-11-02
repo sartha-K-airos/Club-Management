@@ -44,9 +44,10 @@ function renderClubs(containerId, clubsData, role = 'student', currentUserId = n
       if (e.target.tagName === 'BUTTON') return;
       if (window.openClubDetails) window.openClubDetails(club);
     };
+    const clubLogoSrc = club.icon || club.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent((club.name || 'CL').substring(0, 2))}&background=4a1c84&color=fff&bold=true`;
     card.innerHTML = `
       <div class="club-card-header" style="background:linear-gradient(135deg, ${catColor}22, ${catColor}44); pointer-events: none;">
-        <img src="${club.logo}" alt="${club.name}" class="club-logo" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(club.name.substring(0, 2))}&background=4a1c84&color=fff&bold=true'">
+        <img src="${clubLogoSrc}" alt="${club.name}" class="club-logo" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent((club.name || 'CL').substring(0, 2))}&background=4a1c84&color=fff&bold=true'">
         <span class="club-category-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}55;">${club.category}</span>
       </div>
       <div class="club-card-body" style="pointer-events: none;">
@@ -419,7 +420,7 @@ window.openClubDetails = function (club) {
   document.getElementById('cdModalName').textContent = club.name;
   document.getElementById('cdModalCat').textContent = club.category;
   document.getElementById('cdModalDesc').textContent = club.description;
-  document.getElementById('cdModalLogo').src = club.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(club.name.substring(0, 2))}&background=4a1c84&color=fff&bold=true`;
+  document.getElementById('cdModalLogo').src = club.icon || club.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent((club.name || 'CL').substring(0, 2))}&background=4a1c84&color=fff&bold=true`;
   document.getElementById('cdModalMeta').textContent = `${(club.members || 0).toLocaleString('en-IN')} Members · Active since ${club.createdAt || '2023'}`;
 
   const eventsCount = API.events.query(e => e.clubId === club.id).length;

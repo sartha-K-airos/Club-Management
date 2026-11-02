@@ -40,12 +40,23 @@ const Auth = (() => {
     }
   }
 
-  async function logout() {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
-    } catch (e) { /* ignore */ }
+  function logout() {
     _currentUser = null;
-    sessionStorage.removeItem(SESSION_KEY);
+    try {
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem('mits_fast_cache');
+    } catch (e) {}
+
+    // Non-blocking fire-and-forget logout notification to server
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/auth/logout');
+      } else {
+        fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin', keepalive: true }).catch(() => {});
+      }
+    } catch (e) {}
+
+    // Instant redirect to index.html with 0ms delay
     window.location.href = 'index.html';
   }
 

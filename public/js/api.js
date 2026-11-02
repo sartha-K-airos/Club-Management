@@ -1,7 +1,9 @@
-// js/api.js — HTTP API Client (replaces localStorage-based db.js)
-// Maintains an in-memory cache for synchronous reads, async writes to backend
+// js/api.js — High-Performance API Client with Instant Session Hydration
+// Provides instant 0ms DOM loads from sessionStorage + background SWR synchronization
 
 const API = (() => {
+  const CACHE_KEY = 'mits_fast_cache';
+
   let _cache = {
     users: [],
     clubs: [],
@@ -17,6 +19,17 @@ const API = (() => {
     eventFeedback: [],
     quarterlyReports: []
   };
+
+  // Immediate synchronous hydration from sessionStorage (0ms initial render)
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.clubs) && parsed.clubs.length > 0) {
+        _cache = { ..._cache, ...parsed };
+      }
+    }
+  } catch (e) {}
 
   // ─── HTTP Helper ─────────────────────────────────────────────────────────
   async function _fetch(url, options = {}) {
@@ -40,42 +53,51 @@ const API = (() => {
   // ─── Cache Initialization ────────────────────────────────────────────────
   let _readyPromise = null;
 
-  async function init() {
+  async function init(fresh = false) {
     try {
-      const data = await _fetch('/api/data');
-      _cache.users = data.users || [];
-      _cache.clubs = data.clubs || [];
-      _cache.events = data.events || [];
-      _cache.joinRequests = data.joinRequests || [];
-      _cache.announcements = data.announcements || [];
-      _cache.settings = data.settings || {};
-      _cache.eventReports = data.eventReports || [];
-      _cache.eventRegistrations = data.eventRegistrations || [];
-      _cache.resourcePersons = data.resourcePersons || [];
-      _cache.eventGallery = data.eventGallery || [];
-      _cache.clubHierarchy = data.clubHierarchy || [];
-      _cache.eventFeedback = data.eventFeedback || [];
-      _cache.quarterlyReports = data.quarterlyReports || [];
-      console.log('[API] Cache initialized from server.');
+      const data = await _fetch('/api/data' + (fresh ? '?fresh=true' : ''));
+      if (data && data.clubs) {
+        _cache.users = data.users || [];
+        _cache.clubs = data.clubs || [];
+        _cache.events = data.events || [];
+        _cache.joinRequests = data.joinRequests || [];
+        _cache.announcements = data.announcements || [];
+        _cache.settings = data.settings || {};
+        _cache.eventReports = data.eventReports || [];
+        _cache.eventRegistrations = data.eventRegistrations || [];
+        _cache.resourcePersons = data.resourcePersons || [];
+        _cache.eventGallery = data.eventGallery || [];
+        _cache.clubHierarchy = data.clubHierarchy || [];
+        _cache.eventFeedback = data.eventFeedback || [];
+        _cache.quarterlyReports = data.quarterlyReports || [];
+        try {
+          sessionStorage.setItem(CACHE_KEY, JSON.stringify(_cache));
+        } catch (e) {}
+      }
       return _cache;
     } catch (e) {
-      console.error('[API] Failed to init cache:', e);
+      console.warn('[API] Fresh fetch warning:', e);
       return _cache;
     }
   }
 
-  // Auto-trigger cache load on script parse
+  // Auto-trigger background cache refresh
   _readyPromise = init();
 
   async function refreshCache() {
-    _readyPromise = init();
+    _readyPromise = init(true);
     return await _readyPromise;
   }
 
-  // Legacy compatibility
-  async function seed() { return await _readyPromise; }
+  // Legacy compatibility & instant-resolve ready()
+  async function seed() { return await ready(); }
   async function reseed() { return await refreshCache(); }
-  function ready() { return _readyPromise; }
+  function ready() {
+    if (_cache.clubs && _cache.clubs.length > 0) {
+      return Promise.resolve(_cache);
+    }
+    return _readyPromise;
+  }
 
   // ─── Users ────────────────────────────────────────────────────────────────
   const users = {

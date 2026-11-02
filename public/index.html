@@ -1358,7 +1358,7 @@
           const result = await Auth.login(email, pass);
           if (result && result.success) {
             UI.showToast('Welcome back, ' + result.user.name + '! 👋', 'success');
-            setTimeout(() => Auth.redirectToDashboard(result.user.role), 500);
+            setTimeout(() => Auth.redirectToDashboard(result.user.role), 150);
           } else {
             if (errBox) {
               errBox.textContent = (result && result.error) ? result.error : 'Invalid email or password.';
@@ -1422,7 +1422,7 @@
           const result = await Auth.register(name, email, pass, 'student');
           if (result && result.success) {
             UI.showToast('Account created! Welcome, ' + result.user.name + '! 🎉', 'success');
-            setTimeout(() => Auth.redirectToDashboard(result.user.role), 500);
+            setTimeout(() => Auth.redirectToDashboard(result.user.role), 150);
           } else {
             if (errBox) {
               errBox.textContent = (result && result.error) ? result.error : 'Registration failed.';

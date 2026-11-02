@@ -134,6 +134,27 @@ router.post('/verify', authenticate, async (req, res) => {
       }
     });
 
+    // Also sync student into event.rsvps
+    try {
+      const evId = parseInt(registrationData.eventId);
+      const stId = parseInt(req.user.id || registrationData.studentId || 1);
+      const ev = await prisma.event.findUnique({ where: { id: evId } });
+      if (ev) {
+        let rsvps = [];
+        try { rsvps = JSON.parse(ev.rsvps || '[]'); } catch (e) { rsvps = []; }
+        if (!rsvps.includes(stId)) {
+          rsvps.push(stId);
+          await prisma.event.update({
+            where: { id: evId },
+            data: { rsvps: JSON.stringify(rsvps) }
+          });
+        }
+      }
+    } catch (e) { console.error('Payment RSVP sync error:', e); }
+
+    const dataRouter = require('./data');
+    if (dataRouter.invalidateCache) dataRouter.invalidateCache();
+
     res.json({
       success: true,
       registration,

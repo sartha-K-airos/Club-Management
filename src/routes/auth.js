@@ -80,6 +80,9 @@ router.post('/register', async (req, res) => {
     const token = generateToken(user);
     setTokenCookie(res, token);
 
+    const dataRouter = require('./data');
+    if (dataRouter.invalidateCache) dataRouter.invalidateCache();
+
     res.status(201).json({ success: true, user: sanitizeUser(user) });
   } catch (err) {
     console.error('Register error:', err);

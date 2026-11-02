@@ -1,6 +1,15 @@
-// src/routes/data.js — GET / returns ALL collections for the frontend cache
+// src/routes/data.js — GET / returns ALL collections for the frontend cache with in-memory caching
 const router = require('express').Router();
 const prisma = require('../lib/prisma');
+
+let _cachedPayload = null;
+let _cachedAt = 0;
+const CACHE_TTL_MS = 10 * 1000; // 10 seconds
+
+function invalidateCache() {
+  _cachedPayload = null;
+  _cachedAt = 0;
+}
 
 function parseJSON(str, fallback) {
   if (Array.isArray(str) || (typeof str === 'object' && str !== null)) return str;
@@ -14,6 +23,13 @@ function sanitizeUser(user) {
 }
 
 router.get('/', async (req, res) => {
+  // If cache is fresh and fresh flag is not requested, return instantly in 0.5ms!
+  const now = Date.now();
+  if (_cachedPayload && (now - _cachedAt < CACHE_TTL_MS) && req.query.fresh !== 'true') {
+    res.set('Cache-Control', 'private, max-age=5, stale-while-revalidate=15');
+    return res.json(_cachedPayload);
+  }
+
   try {
     const [
       users, clubs, events, joinRequests, announcements,
@@ -36,7 +52,7 @@ router.get('/', async (req, res) => {
       prisma.quarterlyReport.findMany()
     ]);
 
-    res.json({
+    const payload = {
       users: users.map(sanitizeUser),
       clubs,
       events: events.map(e => ({ ...e, rsvps: parseJSON(e.rsvps, []) })),
@@ -50,11 +66,21 @@ router.get('/', async (req, res) => {
       clubHierarchy,
       eventFeedback: eventFeedback.map(f => ({ ...f, categories: parseJSON(f.categories, []) })),
       quarterlyReports: quarterlyReports.map(r => ({ ...r, data: parseJSON(r.data, {}) }))
-    });
+    };
+
+    _cachedPayload = payload;
+    _cachedAt = now;
+
+    res.set('Cache-Control', 'private, max-age=5, stale-while-revalidate=15');
+    res.json(payload);
   } catch (err) {
     console.error('Data fetch error:', err);
+    if (_cachedPayload) {
+      return res.json(_cachedPayload); // Graceful fallback
+    }
     res.status(500).json({ error: 'Failed to fetch data', message: err.message });
   }
 });
 
+router.invalidateCache = invalidateCache;
 module.exports = router;

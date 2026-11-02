@@ -49,6 +49,8 @@ router.put('/:id', authenticate, async (req, res) => {
       data.clubMemberships = JSON.stringify(data.clubMemberships);
     }
     const user = await prisma.user.update({ where: { id }, data });
+    const dataRouter = require('./data');
+    if (dataRouter.invalidateCache) dataRouter.invalidateCache();
     res.json(sanitizeUser(user));
   } catch (err) {
     res.status(500).json({ error: err.message });

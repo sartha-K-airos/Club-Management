@@ -82,6 +82,17 @@ function renderEvents(containerId, eventsData, role = 'student', currentUserId =
     const capacity = event.capacity || 100;
     const venue = event.venue || 'MITS Campus';
 
+    // Check if current user is registered for this event
+    const allRegs = (API.eventRegistrations && API.eventRegistrations.getAll) ? API.eventRegistrations.getAll() : [];
+    const currentUser = (typeof Auth !== 'undefined' && Auth.getCurrentUser) ? Auth.getCurrentUser() : null;
+    const userReg = currentUserId ? allRegs.find(r =>
+      r.eventId === event.id && (
+        r.studentId === currentUserId ||
+        (currentUser && currentUser.email && r.email && r.email.toLowerCase() === currentUser.email.toLowerCase())
+      )
+    ) : null;
+    const isRegistered = !!userReg || hasRSVPed;
+
     // Check for linked Resource Person
     const experts = API.resourcePersons ? API.resourcePersons.getByEvent(event.id) : [];
     const expertText = experts.length > 0 ? `🎙️ Speaker: ${experts[0].name} (${experts[0].organization})` : '';
@@ -93,14 +104,19 @@ function renderEvents(containerId, eventsData, role = 'student', currentUserId =
     let actionHTML = '';
     if (role === 'student') {
       if (isUpcoming) {
-        actionHTML = `
-          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-            <a href="event-register.html?id=${event.id}" class="event-action-btn rsvp-btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Register ${event.isPaid ? '· ₹' + event.price : '(Free)'}</a>
-            ${hasRSVPed
-            ? `<button onclick="unrsvpEvent(${event.id})" class="event-action-btn rsvped-btn">✓ RSVPed (${rsvpCount})</button>`
-            : `<button onclick="rsvpEvent(${event.id})" class="event-action-btn" style="background:#f4f2fa;color:#4a1c84;border:1px solid #4a1c84;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:700;">Quick RSVP</button>`
-          }
-          </div>`;
+        if (isRegistered) {
+          actionHTML = `
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center;">
+              <a href="event-register.html?id=${event.id}" class="event-action-btn" style="background:#15803d;color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:7px 14px;border-radius:8px;font-weight:700;font-size:12px;">🎟️ View My Pass</a>
+              <span style="font-size:12px;color:#15803d;font-weight:700;">✓ Registered</span>
+            </div>`;
+        } else {
+          actionHTML = `
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+              <a href="event-register.html?id=${event.id}" class="event-action-btn rsvp-btn" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">Register ${event.isPaid ? '· ₹' + event.price : '(Free)'}</a>
+              <button onclick="rsvpEvent(${event.id})" class="event-action-btn" style="background:#f4f2fa;color:#4a1c84;border:1px solid #4a1c84;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:700;">Quick RSVP</button>
+            </div>`;
+        }
       } else {
         actionHTML = `
           <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">

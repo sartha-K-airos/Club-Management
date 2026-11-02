@@ -896,20 +896,27 @@
       // Pre-fill user data if logged in
       const currentUser = Auth.getCurrentUser();
       if (currentUser) {
-        const dbUser = DB.users.getById(currentUser.id);
-        if (dbUser) {
-          document.getElementById('regName').value = dbUser.name || '';
-          document.getElementById('regEmail').value = dbUser.email || '';
-          if (dbUser.rollNo) document.getElementById('regRoll').value = dbUser.rollNo;
-          if (dbUser.phone) document.getElementById('regPhone').value = dbUser.phone;
-          if (dbUser.department) document.getElementById('regDept').value = dbUser.department;
-          if (dbUser.year) document.getElementById('regYear').value = dbUser.year;
+        const dbUser = DB.users.getById(currentUser.id) || currentUser;
+        document.getElementById('regName').value = dbUser.name || '';
+        document.getElementById('regEmail').value = dbUser.email || '';
+        if (dbUser.rollNo) document.getElementById('regRoll').value = dbUser.rollNo;
+        if (dbUser.phone) document.getElementById('regPhone').value = dbUser.phone;
+        if (dbUser.department) document.getElementById('regDept').value = dbUser.department;
+        if (dbUser.year) document.getElementById('regYear').value = dbUser.year;
 
-          // Check if already registered
-          const alreadyReg = existingRegs.find(r => r.studentId === dbUser.id || r.studentEmail === dbUser.email);
-          if (alreadyReg) {
-            showConfirmedPass(alreadyReg, currentEvent);
-          }
+        // Check if already registered (by studentId or email)
+        const allRegs = (DB.eventRegistrations && DB.eventRegistrations.getAll) ? DB.eventRegistrations.getAll() : existingRegs;
+        const userEmail = (dbUser.email || currentUser.email || '').toLowerCase();
+        const alreadyReg = allRegs.find(r =>
+          r.eventId === currentEvent.id && (
+            r.studentId === dbUser.id ||
+            r.studentId === currentUser.id ||
+            (r.email && r.email.toLowerCase() === userEmail) ||
+            (r.studentEmail && r.studentEmail.toLowerCase() === userEmail)
+          )
+        );
+        if (alreadyReg) {
+          showConfirmedPass(alreadyReg, currentEvent);
         }
       }
 
@@ -1096,6 +1103,7 @@
         }
 
         UI.showToast(`🎉 Payment of ₹${currentEvent.price} verified! Entry pass issued.`, 'success');
+        await API.refreshCache();
         showConfirmedPass(data.registration, currentEvent, data.qrDataUrl);
       } catch (e) {
         UI.showToast('Verification request failed. Contact administration.', 'error');
@@ -1132,6 +1140,7 @@
         }
 
         UI.showToast('🎉 Free registration confirmed! Entry pass generated.', 'success');
+        await API.refreshCache();
         showConfirmedPass(data.registration, currentEvent, data.qrDataUrl);
       } catch (err) {
         UI.setButtonLoading(submitBtn, false);

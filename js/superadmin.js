@@ -329,7 +329,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tbody = document.getElementById('clubsTableBody');
     if (!tbody) return;
     const clubs = API.clubs.getAll();
-    const leaders = API.users.getAll().filter(u => u.role === 'club-leader');
+    const allUsers = API.users.getAll();
+    // Allow any registered student or club-leader to be appointed
+    const candidates = allUsers.filter(u => u.role === 'club-leader' || u.role === 'student');
+    candidates.sort((a, b) => {
+      if (a.role !== b.role) return a.role === 'club-leader' ? -1 : 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
 
     tbody.innerHTML = clubs.map(c => {
       const leader = API.users.getById(c.leaderId);
@@ -349,9 +355,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td><span style="background:rgba(255,255,255,0.08);padding:3px 10px;border-radius:50px;font-size:11.5px;">${c.category}</span></td>
           <td><b>${(c.members || 0).toLocaleString('en-IN')}</b></td>
           <td>
-            <select onchange="assignLeader(${c.id}, this.value)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;">
+            <select onchange="assignLeader(${c.id}, this.value)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:6px 10px;border-radius:8px;font-size:12px;max-width:220px;">
               <option value="">-- Unassigned --</option>
-              ${leaders.map(l => `<option value="${l.id}" ${c.leaderId === l.id ? 'selected' : ''}>${l.name}</option>`).join('')}
+              ${candidates.map(l => `<option value="${l.id}" ${c.leaderId === l.id ? 'selected' : ''}>${l.name} (${l.role === 'club-leader' ? '⭐ Leader' : 'Student'})</option>`).join('')}
             </select>
           </td>
           <td><b>₹${(c.budget || 35000).toLocaleString('en-IN')}</b></td>
@@ -367,8 +373,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.assignLeader = async function (clubId, leaderId) {
     const lid = leaderId ? parseInt(leaderId) : null;
     const leader = lid ? API.users.getById(lid) : null;
-    await API.clubs.update(clubId, { leaderId: lid, leaderName: leader ? leader.name : null });
-    UI.showToast('Club leader assignment updated.', 'success');
+    try {
+      if (leader && leader.role === 'student') {
+        await API.users.update(leader.id, { role: 'club-leader' });
+      }
+      await API.clubs.update(clubId, { leaderId: lid, leaderName: leader ? leader.name : null });
+      await API.refreshCache();
+      renderClubsTable();
+      renderUsersTable();
+      UI.showToast(leader ? `Appointed ${leader.name} as Leader of ${API.clubs.getById(clubId)?.name || 'Club'}! 🎉` : 'Leader unassigned.', 'success');
+    } catch (err) {
+      console.error('Failed to appoint leader:', err);
+      UI.showToast('Failed to appoint leader: ' + err.message, 'error');
+    }
   };
 
   window.deleteClub = function (clubId) {

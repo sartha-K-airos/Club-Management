@@ -50,3 +50,4 @@ for (const folder of foldersToCopy) {
 }
 
 console.log('✅ Public directory successfully synced for Vercel CDN deployment.');
+

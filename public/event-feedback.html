@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Feedback — MITS StudentHub</title>
+  <meta name="description" content="Submit your ratings and feedback for college club events and workshops attended at MITS.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #f4f2fa; font-family: 'Inter', sans-serif; color: #1a1a2e; margin: 0; line-height: 1.5; }
+
+    .fb-header {
+      background: linear-gradient(135deg, #2d0c5a, #4a1c84);
+      padding: 18px 32px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .fb-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 800; color: #fff; text-decoration: none; }
+    .fb-logo span { color: #36c5bc; }
+    .fb-back-btn {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.12);
+      transition: background 0.2s;
+    }
+    .fb-back-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+    .fb-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+
+    .fb-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 10px 40px rgba(74,28,132,0.08);
+      border: 1.5px solid #ede8f8;
+      margin-bottom: 32px;
+    }
+
+    .fb-hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #2d0c5a;
+      margin: 0 0 8px;
+    }
+    .fb-hero-sub {
+      color: #666;
+      font-size: 14.5px;
+      margin-bottom: 30px;
+    }
+
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; font-size: 13px; font-weight: 700; color: #444; margin-bottom: 8px; }
+    .form-select, .form-textarea, .form-input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      background: #fafafa;
+      transition: all 0.2s;
+    }
+    .form-select:focus, .form-textarea:focus, .form-input:focus {
+      border-color: #4a1c84;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(74,28,132,0.1);
+    }
+
+    /* Star Rating Grid */
+    .rating-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: #fbf9ff;
+      border: 1.5px solid #ede8f8;
+      padding: 24px;
+      border-radius: 18px;
+      margin-bottom: 24px;
+    }
+    .rating-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rating-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #2d0c5a;
+    }
+    .star-row {
+      display: flex;
+      gap: 8px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .star-btn {
+      color: #d1d5db;
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0;
+      transition: color 0.15s, transform 0.15s;
+    }
+    .star-btn:hover, .star-btn.active {
+      color: #f59e0b;
+      transform: scale(1.15);
+    }
+
+    .btn-feedback-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #4a1c84, #7a349c);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 6px 20px rgba(74,28,132,0.3);
+    }
+    .btn-feedback-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(74,28,132,0.4);
+    }
+
+    /* Past Feedback Reviews List */
+    .past-feedback-section {
+      margin-top: 40px;
+    }
+    .past-feedback-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #2d0c5a;
+      margin-bottom: 16px;
+    }
+    .feedback-review-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #ede8f8;
+      margin-bottom: 14px;
+    }
+    .fb-user-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .fb-user-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #2d0c5a;
+    }
+    .fb-stars {
+      color: #f59e0b;
+      font-size: 14px;
+      letter-spacing: 2px;
+    }
+    .fb-text {
+      color: #555;
+      font-size: 13.5px;
+      line-height: 1.6;
+    }
+    .fb-sugg {
+      font-size: 12px;
+      color: #888;
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    @media (max-width: 650px) {
+      .rating-grid { grid-template-columns: 1fr; }
+      .fb-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="fb-header">
+    <a href="index.html" class="fb-logo">MITS STUDENT<span>HUB</span></a>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <a href="student.html" class="fb-back-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="fb-container">
+    <div class="fb-card">
+      <h1 class="fb-hero-title">Event Feedback & Review</h1>
+      <p class="fb-hero-sub">Your feedback directly helps student club organizers and the college administration improve future campus experiences.</p>
+
+      <form id="feedbackForm">
+        <!-- Event Selection -->
+        <div class="form-group">
+          <label class="form-label" for="fbEventSelect">Select Event to Review *</label>
+          <select id="fbEventSelect" class="form-select" required>
+            <option value="">-- Choose an Event --</option>
+          </select>
+        </div>
+
+        <!-- Student Name & Info -->
+        <div class="form-group">
+          <label class="form-label" for="fbStudentName">Your Name</label>
+          <input type="text" id="fbStudentName" class="form-input" placeholder="e.g. Priya Sharma" required>
+        </div>
+
+        <!-- Multi-factor Rating -->
+        <div class="rating-grid">
+          <div class="rating-item">
+            <span class="rating-label">Overall Event Experience</span>
+            <div class="star-row" data-rating-field="overall">
+              <button type="button" class="star-btn" data-val="1">★</button>
+              <button type="button" class="star-btn" data-val="2">★</button>
+              <button type="button" class="star-btn" data-val="3">★</button>
+              <button type="button" class="star-btn" data-val="4">★</button>
+              <button type="button" class="star-btn" data-val="5">★</button>
+            </div>
+            <input type="hidden" id="rateOverall" value="5">
+          </div>
+
+          <div class="rating-item">
+            <span class="rating-label">Speaker / Guest Expert Quality</span>
+            <div class="star-row" data-rating-field="speaker">
+              <button type="button" class="star-btn" data-val="1">★</button>
+              <button type="button" class="star-btn" data-val="2">★</button>
+              <button type="button" class="star-btn" data-val="3">★</button>
+              <button type="button" class="star-btn" data-val="4">★</button>
+              <button type="button" class="star-btn" data-val="5">★</button>
+            </div>
+            <input type="hidden" id="rateSpeaker" value="5">
+          </div>
+
+          <div class="rating-item">
+            <span class="rating-label">Organization & Logistics</span>
+            <div class="star-row" data-rating-field="org">
+              <button type="button" class="star-btn" data-val="1">★</button>
+              <button type="button" class="star-btn" data-val="2">★</button>
+              <button type="button" class="star-btn" data-val="3">★</button>
+              <button type="button" class="star-btn" data-val="4">★</button>
+              <button type="button" class="star-btn" data-val="5">★</button>
+            </div>
+            <input type="hidden" id="rateOrg" value="4">
+          </div>
+
+          <div class="rating-item">
+            <span class="rating-label">Relevance & Learning Value</span>
+            <div class="star-row" data-rating-field="relevance">
+              <button type="button" class="star-btn" data-val="1">★</button>
+              <button type="button" class="star-btn" data-val="2">★</button>
+              <button type="button" class="star-btn" data-val="3">★</button>
+              <button type="button" class="star-btn" data-val="4">★</button>
+              <button type="button" class="star-btn" data-val="5">★</button>
+            </div>
+            <input type="hidden" id="rateRelevance" value="5">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="fbComments">Key Takeaways & Highlights *</label>
+          <textarea id="fbComments" class="form-textarea" rows="3" placeholder="What was the best part of this event? What concepts or skills did you learn?" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="fbSuggestions">Suggestions for Improvement</label>
+          <textarea id="fbSuggestions" class="form-textarea" rows="2" placeholder="Any suggestions regarding venue, hands-on time, timing, or future topics?"></textarea>
+        </div>
+
+        <button type="submit" class="btn-feedback-submit" id="btnSubmitFeedback">Submit Verified Event Feedback →</button>
+      </form>
+    </div>
+
+    <!-- Live Community Feedback for Selected Event -->
+    <section class="past-feedback-section">
+      <h3 class="past-feedback-title">Recent Feedback from Fellow Students</h3>
+      <div id="feedbackListContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Core Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      await API.ready();
+
+      const user = Auth.getCurrentUser();
+      if (user) {
+        document.getElementById('fbStudentName').value = user.name;
+      }
+
+      // Populate Event Dropdown
+      const allEvents = DB.events.getAll();
+      const select = document.getElementById('fbEventSelect');
+      
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselectedId = parseInt(urlParams.get('id'));
+
+      allEvents.forEach(ev => {
+        const club = DB.clubs.getById(ev.clubId);
+        const opt = document.createElement('option');
+        opt.value = ev.id;
+        opt.textContent = `${ev.title} (${club ? club.name : 'MITS Club'}) — ${new Date(ev.date).toLocaleDateString('en-IN')}`;
+        if (preselectedId && ev.id === preselectedId) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      // Default selection if not picked
+      if (!select.value && allEvents.length > 0) {
+        select.value = allEvents[0].id;
+      }
+
+      // Setup Star Click Handlers
+      function setupStarGroup(field, hiddenInputId, initialVal = 5) {
+        const row = document.querySelector(`.star-row[data-rating-field="${field}"]`);
+        const input = document.getElementById(hiddenInputId);
+        if (!row || !input) return;
+
+        const updateStars = (val) => {
+          input.value = val;
+          row.querySelectorAll('.star-btn').forEach(btn => {
+            const bVal = parseInt(btn.dataset.val);
+            if (bVal <= val) btn.classList.add('active');
+            else btn.classList.remove('active');
+          });
+        };
+
+        row.querySelectorAll('.star-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            updateStars(parseInt(btn.dataset.val));
+          });
+        });
+
+        updateStars(initialVal);
+      }
+
+      setupStarGroup('overall', 'rateOverall', 5);
+      setupStarGroup('speaker', 'rateSpeaker', 5);
+      setupStarGroup('org', 'rateOrg', 4);
+      setupStarGroup('relevance', 'rateRelevance', 5);
+
+      // Render Feedbacks for chosen event
+      function renderEventFeedbackList() {
+        const selectedEventId = parseInt(select.value);
+        const container = document.getElementById('feedbackListContainer');
+        if (!selectedEventId) {
+          container.innerHTML = '<p style="color:#888;">Select an event above to view its student reviews.</p>';
+          return;
+        }
+
+        const list = DB.eventFeedback.getByEvent(selectedEventId);
+        if (!list || list.length === 0) {
+          container.innerHTML = `<div style="background:#fff;border-radius:16px;padding:30px;text-align:center;color:#888;border:1px solid #ede8f8;">
+            <div style="font-size:2rem;margin-bottom:8px;">💬</div>
+            No feedback submitted for this event yet. Be the first to review!
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = list.map(item => `
+          <div class="feedback-review-card">
+            <div class="fb-user-row">
+              <span class="fb-user-name">${item.studentName || 'MITS Student'}</span>
+              <span class="fb-stars">${'★'.repeat(item.ratingOverall || 5)}${'☆'.repeat(5 - (item.ratingOverall || 5))}</span>
+            </div>
+            <p class="fb-text">"${item.comments}"</p>
+            ${item.suggestions ? `<div class="fb-sugg">💡 Suggestion: ${item.suggestions}</div>` : ''}
+            <div style="font-size:11px;color:#aaa;margin-top:6px;">${UI.formatDateShort(item.submittedAt)}</div>
+          </div>
+        `).join('');
+      }
+
+      select.addEventListener('change', renderEventFeedbackList);
+      renderEventFeedbackList();
+
+      // Submit Feedback
+      document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const eventId = parseInt(select.value);
+        const name = document.getElementById('fbStudentName').value.trim();
+        const comments = document.getElementById('fbComments').value.trim();
+        const suggestions = document.getElementById('fbSuggestions').value.trim();
+        const btn = document.getElementById('btnSubmitFeedback');
+
+        if (!eventId) {
+          UI.showToast('Please select an event first.', 'error');
+          return;
+        }
+
+        const ev = DB.events.getById(eventId);
+        const studentId = user ? user.id : 999;
+
+        UI.setButtonLoading(btn, true);
+
+        setTimeout(() => {
+          const res = DB.eventFeedback.insert({
+            eventId: eventId,
+            clubId: ev ? ev.clubId : null,
+            studentId: studentId,
+            studentName: name,
+            ratingOverall: parseInt(document.getElementById('rateOverall').value),
+            ratingSpeaker: parseInt(document.getElementById('rateSpeaker').value),
+            ratingOrganization: parseInt(document.getElementById('rateOrg').value),
+            ratingRelevance: parseInt(document.getElementById('rateRelevance').value),
+            comments: comments,
+            suggestions: suggestions
+          });
+
+          UI.setButtonLoading(btn, false);
+
+          if (!res.success) {
+            UI.showToast(res.error, 'info');
+            return;
+          }
+
+          UI.showToast('🎉 Thank you! Your event feedback has been recorded.', 'success');
+          document.getElementById('fbComments').value = '';
+          document.getElementById('fbSuggestions').value = '';
+          renderEventFeedbackList();
+        }, 400);
+      });
+    });
+  </script>
+</body>
+</html>

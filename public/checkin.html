@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Gate Pass Verification — MITS StudentHub</title>
+  <meta name="description" content="Official QR Code & Token Gate Verification Scanner for MITS Campus Events.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #0f0a1c;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .scanner-header {
+      background: linear-gradient(135deg, #2d0c5a, #4a1c84);
+      padding: 18px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+    }
+    .logo-text span { color: #36c5bc; }
+    .nav-links a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      margin-left: 16px;
+      padding: 8px 16px;
+      border-radius: 50px;
+      background: rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    .nav-links a:hover {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+
+    .main-wrap {
+      max-width: 900px;
+      width: 100%;
+      margin: 36px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .main-wrap { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 0 0 8px;
+      color: #fff;
+    }
+    .card-subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      margin: 0 0 20px;
+    }
+
+    #reader {
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px dashed #4a1c84;
+      background: #000;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      color: #36c5bc;
+    }
+    .text-input {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .text-input:focus {
+      border-color: #36c5bc;
+      background: rgba(255,255,255,0.1);
+    }
+    .btn-verify {
+      width: 100%;
+      background: linear-gradient(135deg, #36c5bc, #11a096);
+      color: #0b3633;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-verify:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(54,197,188,0.3);
+    }
+
+    /* Result Card States */
+    .result-box {
+      display: none;
+      border-radius: 20px;
+      padding: 24px;
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .result-success {
+      background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(39, 174, 96, 0.05));
+      border: 2px solid #2ecc71;
+    }
+    .result-warning {
+      background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(230, 126, 34, 0.05));
+      border: 2px solid #f1c40f;
+    }
+    .result-error {
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.05));
+      border: 2px solid #e74c3c;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+    .badge-success { background: #2ecc71; color: #07381b; }
+    .badge-warning { background: #f1c40f; color: #423200; }
+    .badge-error { background: #e74c3c; color: #fff; }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 13.5px;
+    }
+    .detail-label { color: rgba(255,255,255,0.5); }
+    .detail-val { font-weight: 700; color: #fff; text-align: right; }
+    .camera-toggle-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+  <header class="scanner-header">
+    <a href="index.html" class="logo-text">MITS Student<span>Hub</span></a>
+    <div class="nav-links">
+      <a href="student.html">Student Portal</a>
+      <a href="club-leader.html">Club Leader</a>
+      <a href="superadmin.html">SuperAdmin</a>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+    <!-- Scanner / Input Side -->
+    <div class="card">
+      <h2 class="card-title">Event Gate Check-In</h2>
+      <p class="card-subtitle">Scan attendee event pass QR code or input token to verify payment & entry eligibility.</p>
+
+      <button id="cameraToggleBtn" class="camera-toggle-btn" onclick="toggleCamera()">📷 Enable Camera Scanner</button>
+      <div id="reader" style="display:none;"></div>
+
+      <form id="verifyForm" onsubmit="handleManualVerify(event)">
+        <div class="input-group">
+          <label class="input-label" for="passTokenInput">Pass Token / Registration Code</label>
+          <input type="text" id="passTokenInput" class="text-input" placeholder="e.g. REG-201-1001 or paste signed token..." required autofocus>
+        </div>
+        <button type="submit" class="btn-verify" id="verifyBtn">
+          <span>🔍</span>
+          <span>Verify Pass & Check-In</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Verification Result Side -->
+    <div class="card">
+      <h2 class="card-title">Verification Status</h2>
+      <p class="card-subtitle">Real-time gate check status with cryptographic HMAC integrity check.</p>
+
+      <div id="resultPlaceholder" style="text-align:center;padding:50px 20px;color:rgba(255,255,255,0.3);">
+        <div style="font-size:3rem;margin-bottom:12px;">🎟️</div>
+        <p style="font-size:14px;margin:0;">Waiting for pass scan...</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">Sample codes in database: <code>REG-201-1001</code> (Free), <code>REG-202-1002</code> (Paid)</p>
+      </div>
+
+      <div id="resultBox" class="result-box">
+        <div id="statusBadge" class="status-badge"></div>
+        <h3 id="resultHeader" style="margin:0 0 16px;font-size:1.3rem;"></h3>
+
+        <div class="detail-row">
+          <span class="detail-label">Attendee Name</span>
+          <span class="detail-val" id="resName">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Roll Number</span>
+          <span class="detail-val" id="resRoll">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Department & Year</span>
+          <span class="detail-val" id="resDept">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Event</span>
+          <span class="detail-val" id="resEvent" style="color:#36c5bc;">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Pass Code</span>
+          <span class="detail-val" id="resCode" style="font-family:monospace;">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Payment Status</span>
+          <span class="detail-val" id="resPayment">-</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Check-In Time</span>
+          <span class="detail-val" id="resTime">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    let html5QrcodeScanner = null;
+    let cameraActive = false;
+
+    async function handleManualVerify(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('passTokenInput').value.trim();
+      if (!input) return;
+      await verifyToken(input);
+    }
+
+    async function verifyToken(token) {
+      const btn = document.getElementById('verifyBtn');
+      UI.setButtonLoading(btn, true);
+
+      try {
+        const res = await fetch('/api/pass/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ passToken: token, registrationCode: token })
+        });
+
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        renderResult({ valid: false, error: 'Network error communicating with gate server.' });
+      } finally {
+        UI.setButtonLoading(btn, false);
+      }
+    }
+
+    function renderResult(data) {
+      document.getElementById('resultPlaceholder').style.display = 'none';
+      const box = document.getElementById('resultBox');
+      const badge = document.getElementById('statusBadge');
+      const header = document.getElementById('resultHeader');
+
+      box.style.display = 'block';
+      box.className = 'result-box';
+
+      if (data.valid && !data.alreadyCheckedIn) {
+        // Successful First Check-in
+        box.classList.add('result-success');
+        badge.className = 'status-badge badge-success';
+        badge.textContent = '✓ Entry Approved';
+        header.textContent = 'Verified Valid Event Pass';
+
+        populateDetails(data.registration, data.eventTitle);
+        document.getElementById('resTime').textContent = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        UI.showToast(`Pass verified for ${data.registration.studentName}!`, 'success');
+
+      } else if (data.valid && data.alreadyCheckedIn) {
+        // Duplicate Pass / Already Checked in
+        box.classList.add('result-warning');
+        badge.className = 'status-badge badge-warning';
+        badge.textContent = '⚠️ Already Used';
+        header.textContent = 'Pass Has Already Been Checked In!';
+
+        populateDetails(data.registration, data.eventTitle);
+        document.getElementById('resTime').textContent = data.attendedAt ? new Date(data.attendedAt).toLocaleTimeString('en-IN') : 'Earlier Today';
+        UI.showToast('Duplicate entry attempt: Pass already scanned!', 'warning');
+
+      } else {
+        // Invalid Token / Signature Tampered
+        box.classList.add('result-error');
+        badge.className = 'status-badge badge-error';
+        badge.textContent = '✕ Access Denied';
+        header.textContent = data.error || 'Invalid or Forged Pass';
+
+        document.getElementById('resName').textContent = 'N/A';
+        document.getElementById('resRoll').textContent = 'N/A';
+        document.getElementById('resDept').textContent = 'N/A';
+        document.getElementById('resEvent').textContent = 'N/A';
+        document.getElementById('resCode').textContent = 'UNKNOWN';
+        document.getElementById('resPayment').textContent = 'N/A';
+        document.getElementById('resTime').textContent = 'Rejected';
+        UI.showToast(data.error || 'Invalid pass token', 'error');
+      }
+    }
+
+    function populateDetails(reg, eventTitle) {
+      document.getElementById('resName').textContent = reg.studentName || 'Student';
+      document.getElementById('resRoll').textContent = reg.rollNo || 'N/A';
+      document.getElementById('resDept').textContent = `${reg.branch || 'Engineering'} · ${reg.year || ''}`;
+      document.getElementById('resEvent').textContent = eventTitle || 'MITS Event';
+      document.getElementById('resCode').textContent = reg.registrationCode || 'N/A';
+      
+      const paymentEl = document.getElementById('resPayment');
+      if (reg.isPaid) {
+        paymentEl.innerHTML = `<span style="color:#2ecc71;">✓ Paid ₹${reg.amountPaid} (${reg.paymentMethod || 'Online'})</span>`;
+      } else {
+        paymentEl.innerHTML = `<span style="color:#a29bfe;">✨ Complimentary Free Pass</span>`;
+      }
+    }
+
+    function toggleCamera() {
+      const readerEl = document.getElementById('reader');
+      const btn = document.getElementById('cameraToggleBtn');
+
+      if (!cameraActive) {
+        readerEl.style.display = 'block';
+        btn.textContent = '⏹ Stop Camera Scanner';
+        cameraActive = true;
+
+        if (typeof Html5QrcodeScanner !== 'undefined') {
+          html5QrcodeScanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 240 });
+          html5QrcodeScanner.render((qrCodeMessage) => {
+            document.getElementById('passTokenInput').value = qrCodeMessage;
+            verifyToken(qrCodeMessage);
+            html5QrcodeScanner.clear();
+            readerEl.style.display = 'none';
+            btn.textContent = '📷 Enable Camera Scanner';
+            cameraActive = false;
+          });
+        }
+      } else {
+        if (html5QrcodeScanner) html5QrcodeScanner.clear();
+        readerEl.style.display = 'none';
+        btn.textContent = '📷 Enable Camera Scanner';
+        cameraActive = false;
+      }
+    }
+  </script>
+</body>
+</html>
+

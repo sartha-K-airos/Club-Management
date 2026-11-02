@@ -34,16 +34,29 @@ app.use('/api/settings', require('./src/routes/settings'));
 app.use('/api/payments', require('./src/routes/payments'));
 app.use('/api/pass', require('./src/routes/pass'));
 
-// ── Static files (HTML, CSS, JS, data) — served from project root ───────
+// ── Static files (HTML, CSS, JS, data) — served from public and root ──────
+const fs = require('fs');
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
 
-// ── SPA fallback — serve index.html for unknown routes ──────────────────
+// ── Fallback — never serve HTML for asset requests ─────────────────────────
 app.get('*', (req, res) => {
-  // Only serve index.html for non-API, non-file requests
-  if (!req.path.startsWith('/api/')) {
-    res.sendFile(path.join(__dirname, 'index.html'));
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  // Never return index.html for missing static files (.js, .css, images, etc.)
+  if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|json|woff2?|ttf|map)$/i.test(req.path)) {
+    return res.status(404).type('text/plain').send('File not found');
+  }
+
+  const publicIndex = path.join(__dirname, 'public', 'index.html');
+  const rootIndex = path.join(__dirname, 'index.html');
+  if (fs.existsSync(publicIndex)) {
+    res.sendFile(publicIndex);
+  } else if (fs.existsSync(rootIndex)) {
+    res.sendFile(rootIndex);
   } else {
-    res.status(404).json({ error: 'API endpoint not found' });
+    res.status(404).send('Page not found');
   }
 });
 

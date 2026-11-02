@@ -82,14 +82,37 @@ const Auth = (() => {
     return user;
   }
 
-  // Route from login based on role
-  function redirectToDashboard(role) {
+  // Route from login based on role and active club assignment
+  function redirectToDashboard(role, user) {
+    const currentUser = user || getCurrentUser();
+    if (role === 'club-leader' && currentUser) {
+      let hasClub = false;
+      try {
+        const raw = sessionStorage.getItem('mits_fast_cache');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.clubs)) {
+            hasClub = parsed.clubs.some(c => 
+              Number(c.leaderId) === Number(currentUser.id) || 
+              (c.leaderName && currentUser.name && c.leaderName.trim().toLowerCase() === currentUser.name.trim().toLowerCase())
+            );
+          }
+        }
+      } catch (e) {}
+
+      // If not actively assigned to lead a club, log in as normal student
+      if (!hasClub) {
+        window.location.href = 'student.html';
+        return;
+      }
+    }
+
     const routes = {
       'student':     'student.html',
       'club-leader': 'club-leader.html',
       'superadmin':  'superadmin.html'
     };
-    window.location.href = routes[role] || 'index.html';
+    window.location.href = routes[role] || 'student.html';
   }
 
   // Check server session on load (optional — validates JWT is still valid)

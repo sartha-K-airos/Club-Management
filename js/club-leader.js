@@ -20,20 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   if (!managedClub) {
-    const banner = document.querySelector('.club-banner');
-    if (banner) {
-      banner.innerHTML = `
-        <div style="background:rgba(255,255,255,0.08);backdrop-filter:blur(8px);border-radius:18px;padding:36px 24px;text-align:center;width:100%;border:1px solid rgba(255,255,255,0.2);">
-          <div style="font-size:3rem;margin-bottom:12px;">⏳</div>
-          <h2 style="font-family:'Playfair Display',serif;color:#fff;margin:0 0 10px;font-size:1.6rem;">Leadership Assignment Pending</h2>
-          <p style="color:rgba(255,255,255,0.9);font-size:14.5px;max-width:540px;margin:0 auto 12px;line-height:1.6;">
-            Welcome, <strong>${currentUser.name}</strong>! Your account has Club Leader privileges.
-            The Super Admin has not assigned you to lead a specific club charter yet.
-          </p>
-          <p style="color:rgba(255,255,255,0.65);font-size:12.5px;margin:0;">Once assigned from the Super Admin portal, your full club dashboard and operations will activate automatically.</p>
-        </div>`;
-    }
-    document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+    // If user is not currently assigned to lead any active club, redirect directly to student portal
+    window.location.replace('student.html');
     return;
   }
 

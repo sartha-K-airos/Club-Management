@@ -452,6 +452,96 @@
       box-shadow: 0 6px 20px rgba(16,185,129,0.4);
     }
 
+    
+    /* Event Catalog Directory Styles */
+    .cat-chip {
+      background: #f1ecfa;
+      color: #4a1c84;
+      border: 1.5px solid transparent;
+      padding: 7px 18px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-chip:hover {
+      background: #e4d8f8;
+    }
+    .cat-chip.active {
+      background: #4a1c84;
+      color: #fff;
+    }
+    .catalog-card {
+      background: #fff;
+      border-radius: 18px;
+      border: 1.5px solid #ede8f8;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+    }
+    .catalog-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(74,28,132,0.1);
+      border-color: #d8cbeb;
+    }
+    .catalog-card-img {
+      width: 100%;
+      height: 165px;
+      object-fit: cover;
+      background: #f4f0fa;
+    }
+    .catalog-card-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .catalog-club-badge {
+      display: inline-block;
+      align-self: flex-start;
+      background: #ede9fe;
+      color: #6b21a8;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 50px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .catalog-card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin: 0 0 10px;
+      line-height: 1.35;
+    }
+    .catalog-card-meta {
+      font-size: 12.5px;
+      color: #64748b;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .catalog-card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .catalog-price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid #f1ecfa;
+      margin-top: auto;
+      margin-bottom: 14px;
+    }
+
     /* Print Styles */
     @media print {
       body { background: #fff !important; }
@@ -477,12 +567,55 @@
   <!-- Navigation Bar -->
   <header class="reg-header">
     <a href="index.html" class="reg-logo">MITS STUDENT<span>HUB</span></a>
-    <div style="display:flex;gap:12px;align-items:center;">
-      <a href="student.html" class="reg-back-btn">← Back to Dashboard</a>
+    <div style="display:flex;gap:12px;align-items:center;" id="headerActions">
+      <a href="index.html" class="reg-back-btn" id="btnBackHome">← Back to Home</a>
+      <a href="student.html" class="reg-back-btn" id="btnBackDashboard" style="display:none;">← Back to Dashboard</a>
     </div>
   </header>
 
-  <main class="reg-container">
+  <!-- 1. EVENT DIRECTORY / CATALOG VIEW (shown when no event ID is in URL) -->
+  <div id="eventCatalogView" style="display:none;max-width:1160px;margin:32px auto 60px;padding:0 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="display:inline-block;background:#ede9fe;color:#5b21b6;font-size:12px;font-weight:800;padding:5px 16px;border-radius:50px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px;">
+        📅 MITS Events & Workshops
+      </div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:2.2rem;color:#1e1b4b;margin:0 0 10px;font-weight:900;">
+        Explore & Register for Events
+      </h1>
+      <p style="color:#64748b;font-size:15px;max-width:620px;margin:0 auto;line-height:1.6;">
+        Choose an upcoming workshop, competition, or seminar below to view full details and generate your entry pass.
+      </p>
+    </div>
+
+    <!-- Search & Category Filters -->
+    <div style="background:#fff;padding:16px 20px;border-radius:16px;border:1.5px solid #ede8f8;box-shadow:0 4px 20px rgba(0,0,0,0.03);margin-bottom:28px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;">
+      <div style="flex:1;min-width:240px;">
+        <input type="text" id="catalogSearchInput" placeholder="🔍 Search events by name, club, or venue..." style="width:100%;padding:10px 16px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:13.5px;outline:none;" oninput="filterCatalogEvents()">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="catalogFilterChips">
+        <button type="button" class="cat-chip active" data-cat="all" onclick="setCatalogCategory('all', this)">All</button>
+        <button type="button" class="cat-chip" data-cat="Technology" onclick="setCatalogCategory('Technology', this)">Technology</button>
+        <button type="button" class="cat-chip" data-cat="Arts" onclick="setCatalogCategory('Arts', this)">Arts</button>
+        <button type="button" class="cat-chip" data-cat="Academic" onclick="setCatalogCategory('Academic', this)">Academic</button>
+        <button type="button" class="cat-chip" data-cat="Sports" onclick="setCatalogCategory('Sports', this)">Sports</button>
+      </div>
+    </div>
+
+    <!-- Events Grid -->
+    <div id="eventCatalogGrid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:24px;"></div>
+  </div>
+
+  <!-- 2. REGISTRATION CHECKOUT VIEW (shown when an event is selected) -->
+  <div id="eventRegistrationView" style="display:none;">
+    <div style="max-width:1080px;margin:24px auto 0;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <button type="button" onclick="showCatalogView()" style="background:#fff;border:1.5px solid #ede8f8;color:#4a1c84;font-weight:700;padding:8px 18px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+        ← Browse Other Events
+      </button>
+      <div style="font-size:13px;color:#777;">
+        Events / <strong id="regBreadcrumbTitle" style="color:#2d0c5a;">Registration</strong>
+      </div>
+    </div>
+    <main class="reg-container">
     <!-- Left: Event Summary -->
     <section class="event-info-card" id="eventCard">
       <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80" alt="Event Banner" class="event-info-img" id="evImg">
@@ -688,6 +821,7 @@
       </div>
     </section>
   </main>
+  </div> <!-- /#eventRegistrationView -->
 
   <!-- MITS College Secure Payment Gateway Modal -->
   <div class="pay-modal-backdrop" id="payModal">
@@ -816,26 +950,158 @@
     let selectedBankName = 'State Bank of India';
     let pendingFormData = null;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      await API.ready();
+    let catalogCat = 'all';
+    let catalogSearch = '';
 
-      // Parse event ID from URL query ?id=...
-      const urlParams = new URLSearchParams(window.location.search);
-      let eventId = parseInt(urlParams.get('id'));
+    window.setCatalogCategory = function(cat, btn) {
+      catalogCat = cat;
+      document.querySelectorAll('#catalogFilterChips .cat-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderCatalogGrid();
+    };
 
-      // If no ID or invalid, default to first upcoming event
-      currentEvent = DB.events.getById(eventId);
-      if (!currentEvent) {
-        const upcoming = DB.events.upcoming();
-        currentEvent = upcoming.length ? upcoming[0] : DB.events.getAll()[0];
-        eventId = currentEvent ? currentEvent.id : 202;
+    window.filterCatalogEvents = function() {
+      const input = document.getElementById('catalogSearchInput');
+      catalogSearch = input ? input.value.trim().toLowerCase() : '';
+      renderCatalogGrid();
+    };
+
+    window.showCatalogView = function() {
+      try {
+        window.history.pushState(null, '', window.location.pathname);
+      } catch(e) {}
+      document.getElementById('eventCatalogView').style.display = 'block';
+      document.getElementById('eventRegistrationView').style.display = 'none';
+      renderCatalogGrid();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.selectEvent = function(id) {
+      try {
+        window.history.pushState(null, '', window.location.pathname + '?id=' + id);
+      } catch(e) {}
+      loadRegistrationForm(id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.viewExistingPass = function(eventId) {
+      selectEvent(eventId);
+    };
+
+    function renderCatalogGrid() {
+      const container = document.getElementById('eventCatalogGrid');
+      if (!container) return;
+
+      let events = DB.events.getAll();
+      events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      if (catalogCat !== 'all') {
+        events = events.filter(e => {
+          const club = DB.clubs.getById(e.clubId);
+          return club && club.category && club.category.toLowerCase() === catalogCat.toLowerCase();
+        });
       }
 
-      if (!currentEvent) {
-        alert('Event not found.');
-        window.location.href = 'student.html';
+      if (catalogSearch) {
+        events = events.filter(e => {
+          const club = DB.clubs.getById(e.clubId);
+          const clubName = club ? club.name.toLowerCase() : '';
+          return (e.title || '').toLowerCase().includes(catalogSearch) ||
+                 (e.venue || '').toLowerCase().includes(catalogSearch) ||
+                 (e.description || '').toLowerCase().includes(catalogSearch) ||
+                 clubName.includes(catalogSearch);
+        });
+      }
+
+      if (events.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:60px 20px;background:#fff;border-radius:18px;border:1.5px solid #ede8f8;">
+            <div style="font-size:2.5rem;margin-bottom:12px;">🔍</div>
+            <h3 style="color:#2d0c5a;margin:0 0 8px;">No matching events found</h3>
+            <p style="color:#777;font-size:14px;margin:0 0 16px;">Try adjusting your search query or category filter.</p>
+            <button onclick="setCatalogCategory('all');document.getElementById('catalogSearchInput').value='';" style="background:#4a1c84;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-weight:700;cursor:pointer;">Reset Filters</button>
+          </div>`;
         return;
       }
+
+      const currentUser = Auth.getCurrentUser();
+      const allRegs = DB.eventRegistrations.getAll ? DB.eventRegistrations.getAll() : [];
+      const userEmail = (currentUser?.email || '').toLowerCase();
+
+      container.innerHTML = events.map(e => {
+        const club = DB.clubs.getById(e.clubId);
+        const isPaid = !!e.isPaid && e.price > 0;
+        const regs = DB.eventRegistrations.getByEvent(e.id);
+        const cap = e.capacity || 100;
+        const seats = Math.max(0, cap - regs.length);
+        const isRegistered = currentUser && (
+          (e.rsvps && e.rsvps.includes(currentUser.id)) ||
+          allRegs.some(r => Number(r.eventId) === Number(e.id) && (
+            Number(r.studentId) === Number(currentUser.id) ||
+            (r.email && r.email.toLowerCase() === userEmail) ||
+            (r.studentEmail && r.studentEmail.toLowerCase() === userEmail)
+          ))
+        );
+
+        return `
+          <div class="catalog-card">
+            <div style="position:relative;">
+              <img src="${e.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=80'}" alt="${e.title}" class="catalog-card-img">
+              <span style="position:absolute;top:12px;right:12px;background:${isPaid ? '#7a349c' : '#15803d'};color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:50px;box-shadow:0 2px 6px rgba(0,0,0,0.25);">
+                ${isPaid ? '₹' + e.price : 'Free'}
+              </span>
+            </div>
+            <div class="catalog-card-body">
+              <span class="catalog-club-badge">🏛️ ${club ? club.name : 'MITS Club'}</span>
+              <h3 class="catalog-card-title">${e.title}</h3>
+              
+              <div class="catalog-card-meta">
+                <div class="catalog-card-meta-row">
+                  <span>📅</span>
+                  <span>${UI.formatDate(e.date)}</span>
+                </div>
+                <div class="catalog-card-meta-row">
+                  <span>📍</span>
+                  <span>${e.venue || 'MITS Main Campus'}</span>
+                </div>
+                <div class="catalog-card-meta-row">
+                  <span>👥</span>
+                  <span style="color:${seats < 15 ? '#dc2626' : '#15803d'};font-weight:700;">${seats} of ${cap} seats left</span>
+                </div>
+              </div>
+
+              <div class="catalog-price-row">
+                <span style="font-size:12px;color:#777;font-weight:600;">Registration</span>
+                <span style="font-size:14px;font-weight:800;color:#2d0c5a;">${isPaid ? '₹' + e.price + ' / person' : 'Complimentary Free'}</span>
+              </div>
+
+              ${isRegistered ? `
+                <button onclick="viewExistingPass(${e.id})" style="background:#15803d;color:#fff;border:none;padding:11px 16px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+                  🎟️ View My Pass (✓ Registered)
+                </button>
+              ` : `
+                <button onclick="selectEvent(${e.id})" style="background:linear-gradient(135deg, #4a1c84, #6b21a8);color:#fff;border:none;padding:11px 16px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 3px 12px rgba(74,28,132,0.25);">
+                  Register for Event →
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function loadRegistrationForm(eventId) {
+      currentEvent = DB.events.getById(eventId);
+      if (!currentEvent) {
+        showCatalogView();
+        return;
+      }
+
+      document.getElementById('eventCatalogView').style.display = 'none';
+      document.getElementById('eventRegistrationView').style.display = 'block';
+
+      const breadcrumb = document.getElementById('regBreadcrumbTitle');
+      if (breadcrumb) breadcrumb.textContent = currentEvent.title;
 
       // Populate Event Details
       const club = DB.clubs.getById(currentEvent.clubId);
@@ -891,10 +1157,15 @@
         document.getElementById('expertTitle').textContent = expert.title;
         document.getElementById('expertOrg').textContent = expert.organization;
         if (expert.avatar) document.getElementById('expertImg').src = expert.avatar;
+      } else {
+        document.getElementById('expertContainer').style.display = 'none';
       }
 
       // Pre-fill user data if logged in
       const currentUser = Auth.getCurrentUser();
+      const formEl = document.getElementById('eventRegForm');
+      const passCard = document.getElementById('passCard');
+
       if (currentUser) {
         const dbUser = DB.users.getById(currentUser.id) || currentUser;
         document.getElementById('regName').value = dbUser.name || '';
@@ -904,21 +1175,65 @@
         if (dbUser.department) document.getElementById('regDept').value = dbUser.department;
         if (dbUser.year) document.getElementById('regYear').value = dbUser.year;
 
-        // Check if already registered (by studentId or email)
-        const allRegs = (DB.eventRegistrations && DB.eventRegistrations.getAll) ? DB.eventRegistrations.getAll() : existingRegs;
+        // Check if already registered
+        const allRegs = DB.eventRegistrations.getAll ? DB.eventRegistrations.getAll() : existingRegs;
         const userEmail = (dbUser.email || currentUser.email || '').toLowerCase();
         const alreadyReg = allRegs.find(r =>
-          r.eventId === currentEvent.id && (
-            r.studentId === dbUser.id ||
-            r.studentId === currentUser.id ||
+          Number(r.eventId) === Number(currentEvent.id) && (
+            Number(r.studentId) === Number(dbUser.id) ||
+            Number(r.studentId) === Number(currentUser.id) ||
             (r.email && r.email.toLowerCase() === userEmail) ||
             (r.studentEmail && r.studentEmail.toLowerCase() === userEmail)
           )
         );
         if (alreadyReg) {
           showConfirmedPass(alreadyReg, currentEvent);
+        } else {
+          if (passCard) passCard.style.display = 'none';
+          if (formEl) formEl.style.display = 'block';
         }
+      } else {
+        if (passCard) passCard.style.display = 'none';
+        if (formEl) formEl.style.display = 'block';
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await API.ready();
+
+      // Configure Smart Header Navigation
+      const currentUser = Auth.getCurrentUser();
+      const btnDashboard = document.getElementById('btnBackDashboard');
+      const btnHome = document.getElementById('btnBackHome');
+      if (currentUser) {
+        if (btnDashboard) btnDashboard.style.display = 'inline-flex';
+        if (btnHome) btnHome.style.display = 'none';
+      } else {
+        if (btnDashboard) btnDashboard.style.display = 'none';
+        if (btnHome) btnHome.style.display = 'inline-flex';
+      }
+
+      // Parse event ID from URL query ?id=...
+      const urlParams = new URLSearchParams(window.location.search);
+      const rawId = urlParams.get('id');
+      const eventId = rawId ? parseInt(rawId) : null;
+
+      if (eventId && DB.events.getById(eventId)) {
+        loadRegistrationForm(eventId);
+      } else {
+        showCatalogView();
+      }
+
+      // Handle browser back/forward buttons seamlessly
+      window.addEventListener('popstate', () => {
+        const p = new URLSearchParams(window.location.search);
+        const id = p.get('id') ? parseInt(p.get('id')) : null;
+        if (id && DB.events.getById(id)) {
+          loadRegistrationForm(id);
+        } else {
+          showCatalogView();
+        }
+      });
 
       // Handle Registration Form Submit
       document.getElementById('eventRegForm').addEventListener('submit', async function(e) {

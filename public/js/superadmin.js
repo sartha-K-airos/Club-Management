@@ -371,13 +371,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   window.assignLeader = async function (clubId, leaderId) {
+    const club = API.clubs.getById(clubId);
+    const oldLeaderId = club ? club.leaderId : null;
     const lid = leaderId ? parseInt(leaderId) : null;
     const leader = lid ? API.users.getById(lid) : null;
     try {
+      // If old leader existed and is being changed, demote them back to student if they lead no other club
+      if (oldLeaderId && oldLeaderId !== lid) {
+        const otherClubs = API.clubs.getAll().filter(c => c.id !== clubId && Number(c.leaderId) === Number(oldLeaderId));
+        if (otherClubs.length === 0) {
+          await API.users.update(oldLeaderId, { role: 'student' });
+        }
+      }
+
       if (leader && leader.role === 'student') {
         await API.users.update(leader.id, { role: 'club-leader' });
       }
-      await API.clubs.update(clubId, { leaderId: lid, leaderName: leader ? leader.name : null });
+      await API.clubs.update(clubId, { leaderId: lid, leaderName: leader ? leader.name : 'Unassigned' });
       await API.refreshCache();
       renderClubsTable();
       renderUsersTable();

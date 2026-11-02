@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ─── Auth Guard (synchronous, 0ms redirect if unauthorized) ───────────────
-  const currentUser = Auth.requireRole('student');
+  const currentUser = Auth.requireRole('student', 'club-leader');
   if (!currentUser) return;
 
   // Render header immediately from session storage (0ms instant display)
@@ -19,6 +19,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   await API.ready();
 
   let user = API.users.getById(currentUser.id) || currentUser;
+
+  // If user is also an active club leader, add quick shortcut pill to their leader dashboard
+  try {
+    const managedClub = API.clubs.query(c => Number(c.leaderId) === Number(currentUser.id))[0];
+    if (managedClub && !document.getElementById('leaderSwitchPill')) {
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight) {
+        const pill = document.createElement('a');
+        pill.id = 'leaderSwitchPill';
+        pill.href = 'club-leader.html';
+        pill.style.cssText = 'background:#fef3c7;color:#92400e;border:1.5px solid #fcd34d;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:5px;';
+        pill.innerHTML = '👑 Leader Panel (' + managedClub.name + ') →';
+        headerRight.insertBefore(pill, headerRight.firstChild);
+      }
+    }
+  } catch(e) {}
 
   // ─── Tab System ──────────────────────────────────────────────────────────
   window.switchTab = function (tabName) {

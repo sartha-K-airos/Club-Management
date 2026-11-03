@@ -946,6 +946,7 @@
   <script src="js/common.js"></script>
   <script>
     let currentEvent = null;
+    let isPaid = false;
     let selectedPayMethod = 'upi';
     let selectedBankName = 'State Bank of India';
     let pendingFormData = null;
@@ -1113,7 +1114,7 @@
       if (currentEvent.image) document.getElementById('evImg').src = currentEvent.image;
 
       // Pricing setup
-      const isPaid = !!currentEvent.isPaid && currentEvent.price > 0;
+      isPaid = !!currentEvent.isPaid && currentEvent.price > 0;
       const priceBox = document.getElementById('evPricingBox');
       const orderSummaryBox = document.getElementById('orderSummaryBox');
       const submitBtn = document.getElementById('submitRegBtn');
@@ -1246,6 +1247,11 @@
         const year = document.getElementById('regYear').value;
         const expectations = document.getElementById('regExpectations').value.trim();
 
+        if (!currentEvent) {
+          UI.showToast('Please select an event before proceeding.', 'error');
+          return;
+        }
+
         const currentUser = Auth.getCurrentUser();
         pendingFormData = {
           eventId: currentEvent.id,
@@ -1259,9 +1265,13 @@
           expectations: expectations
         };
 
+        const isPaidEvent = !!(currentEvent.isPaid && currentEvent.price > 0);
+        isPaid = isPaidEvent;
+
         // If Paid Event: Initiate Order & Payment Gateway
-        if (isPaid) {
-          document.getElementById('cardNameInput').value = name;
+        if (isPaidEvent) {
+          const cardNameEl = document.getElementById('cardNameInput');
+          if (cardNameEl) cardNameEl.value = name;
           await handlePaidPayment();
         } else {
           // Free Event: Direct Server Registration

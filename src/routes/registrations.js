@@ -1,7 +1,7 @@
 // src/routes/registrations.js — CRUD for event registrations, attendance marking
 const router = require('express').Router();
 const prisma = require('../lib/prisma');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const { generatePassToken, generateQRDataUrl } = require('../lib/passToken');
 
 // GET /api/registrations  ?eventId=X&studentId=X
@@ -18,11 +18,11 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/registrations (Free and Direct registrations)
-router.post('/', authenticate, async (req, res) => {
+router.post('/', optionalAuth, async (req, res) => {
   try {
     const data = { ...req.body };
     const eventId = parseInt(data.eventId);
-    const studentId = parseInt(req.user.id || data.studentId || 1);
+    const studentId = parseInt(req.user?.id || data.studentId || 1);
 
     // Check for duplicate registration
     const existing = await prisma.eventRegistration.findFirst({
@@ -55,9 +55,9 @@ router.post('/', authenticate, async (req, res) => {
         registrationCode: data.registrationCode,
         eventId,
         studentId,
-        studentName: data.studentName || req.user.name || 'Student',
-        email: data.email || req.user.email,
-        rollNo: data.rollNo || req.user.rollNo,
+        studentName: data.studentName || req.user?.name || 'Student',
+        email: data.email || req.user?.email,
+        rollNo: data.rollNo || req.user?.rollNo,
         branch: data.branch || data.department || 'Engineering',
         year: data.year,
         phone: data.phone,

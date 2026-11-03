@@ -45,9 +45,12 @@ const newSnippet = `// Handle Registration Form Submit
           expectations: expectations
         };
 
+        const isPaidEvent = !!(currentEvent && currentEvent.isPaid && currentEvent.price > 0);
+
         // If Paid Event: Initiate Order & Payment Gateway
-        if (isPaid) {
-          document.getElementById('cardNameInput').value = name;
+        if (isPaidEvent) {
+          const cardNameEl = document.getElementById('cardNameInput');
+          if (cardNameEl) cardNameEl.value = name;
           await handlePaidPayment();
         } else {
           // Free Event: Direct Server Registration

@@ -3,7 +3,7 @@ const router = require('express').Router();
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const prisma = require('../lib/prisma');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const { generatePassToken, generateQRDataUrl } = require('../lib/passToken');
 
 // Initialize Razorpay
@@ -28,21 +28,23 @@ if (isLiveKey) {
 }
 
 // POST /api/payments/create-order
-router.post('/create-order', authenticate, async (req, res) => {
+router.post('/create-order', optionalAuth, async (req, res) => {
   try {
-    const { eventId } = req.body;
+    const { eventId, userId } = req.body;
     const event = await prisma.event.findUnique({ where: { id: parseInt(eventId) } });
     if (!event) return res.status(404).json({ error: 'Event not found' });
     if (!event.isPaid || event.price <= 0) {
       return res.status(400).json({ error: 'This is a free event' });
     }
 
+    const effectiveUserId = req.user?.id || parseInt(userId) || 1;
+
     if (razorpay) {
       const order = await razorpay.orders.create({
         amount: Math.round(event.price * 100), // amount in paise
         currency: 'INR',
         receipt: `rcpt_${eventId}_${Date.now()}`,
-        notes: { eventId: String(eventId), userId: String(req.user.id) }
+        notes: { eventId: String(eventId), userId: String(effectiveUserId) }
       });
 
       return res.json({
@@ -70,7 +72,7 @@ router.post('/create-order', authenticate, async (req, res) => {
 });
 
 // POST /api/payments/verify
-router.post('/verify', authenticate, async (req, res) => {
+router.post('/verify', optionalAuth, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, registrationData } = req.body;
 
@@ -100,11 +102,13 @@ router.post('/verify', authenticate, async (req, res) => {
     const rand = Math.floor(1000 + Math.random() * 9000);
     const registrationCode = `REG-${registrationData.eventId}-${rand}`;
 
+    const studentId = parseInt(req.user?.id || registrationData.studentId || 1);
+
     // Generate cryptographic pass token
     const regDataWithCode = {
       registrationCode,
       eventId: parseInt(registrationData.eventId),
-      studentId: parseInt(req.user.id || registrationData.studentId || 1)
+      studentId
     };
     const passToken = generatePassToken(regDataWithCode);
     const qrDataUrl = await generateQRDataUrl(passToken);
@@ -114,10 +118,10 @@ router.post('/verify', authenticate, async (req, res) => {
       data: {
         registrationCode,
         eventId: parseInt(registrationData.eventId),
-        studentId: parseInt(req.user.id || registrationData.studentId || 1),
-        studentName: registrationData.studentName || req.user.name || 'Student',
-        email: registrationData.email || req.user.email,
-        rollNo: registrationData.rollNo || req.user.rollNo,
+        studentId,
+        studentName: registrationData.studentName || req.user?.name || 'Student',
+        email: registrationData.email || req.user?.email,
+        rollNo: registrationData.rollNo || req.user?.rollNo,
         branch: registrationData.branch || registrationData.department || 'Engineering',
         year: registrationData.year,
         phone: registrationData.phone,
@@ -137,7 +141,7 @@ router.post('/verify', authenticate, async (req, res) => {
     // Also sync student into event.rsvps
     try {
       const evId = parseInt(registrationData.eventId);
-      const stId = parseInt(req.user.id || registrationData.studentId || 1);
+      const stId = studentId;
       const ev = await prisma.event.findUnique({ where: { id: evId } });
       if (ev) {
         let rsvps = [];
